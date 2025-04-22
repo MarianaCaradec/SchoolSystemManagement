@@ -1,0 +1,169 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using SchoolManagement.API.Data.Seeds;
+using SchoolManagement.API.Models;
+
+namespace SchoolManagement.API.Data.Context
+{
+    public class SchoolSysDBContext : DbContext
+    {
+        public SchoolSysDBContext(DbContextOptions<SchoolSysDBContext> options) : base(options) { }
+
+        #region Properties
+
+        public DbSet<Teacher> Teachers { get; set; }
+        public DbSet<Subject> Subjects { get; set; }
+        public DbSet<Class> Classes { get; set; }
+        public DbSet<Student> Students { get; set; }
+        public DbSet<Attendance> Attendances { get; set; }
+        public DbSet<Grade> Grades { get; set; }
+
+        #endregion
+
+        #region Methods
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            #region Teacher 
+            modelBuilder.Entity<Teacher>(t =>
+            {
+                t.HasKey(t => t.Id);
+                t.Property(t => t.Id).ValueGeneratedOnAdd();
+                t.Property(t => t.Name).IsRequired();
+                t.Property(t => t.Surname).IsRequired();
+                t.Property(t => t.BirthDate).IsRequired();
+                t.Property(t => t.Address).IsRequired();
+                t.Property(t => t.MobileNumber).IsRequired();
+                t.Property(t => t.Email).IsRequired();
+                t.Property(t => t.Password).IsRequired();
+            });
+            #endregion
+
+            #region Subject
+            modelBuilder.Entity<Subject>(sub =>
+            {
+                sub.HasKey(sub => sub.Id);
+                sub.Property(sub => sub.Id).ValueGeneratedOnAdd();
+                sub.Property(sub => sub.Title).IsRequired();
+
+                sub.HasMany(sub => sub.Teachers)
+                       .WithMany(t => t.Subjects)
+                       .UsingEntity<Dictionary<string, object>>(
+                           "SubjectTeacher",
+                           x => x.HasOne<Teacher>().WithMany().HasForeignKey("TeacherId"),
+                           x => x.HasOne<Subject>().WithMany().HasForeignKey("SubjectId"),
+                           x => x.HasData(
+                               new { TeacherId = 1, SubjectId = 3 },
+                               new { TeacherId = 2, SubjectId = 2 },
+                               new { TeacherId = 3, SubjectId = 1 }
+                           )
+                       );
+            }); 
+            #endregion
+
+            #region Class
+            modelBuilder.Entity<Class>(c =>
+            {
+                c.HasKey(c => c.Id);
+                c.Property(c => c.Id).ValueGeneratedOnAdd();
+                c.Property(c => c.Course).IsRequired();
+                c.Property(c => c.Divition).IsRequired();
+                c.Property(c => c.Capacity).IsRequired();
+
+                c.HasMany(c => c.Teachers)
+                   .WithMany(t => t.Classes)
+                   .UsingEntity<Dictionary<string, object>>(
+                       "ClassTeacher",
+                       x => x.HasOne<Teacher>().WithMany().HasForeignKey("TeacherId"),
+                       x => x.HasOne<Class>().WithMany().HasForeignKey("ClassId"),
+                       x => x.HasData(
+                           new { ClassId = 1, TeacherId = 1 },
+                           new { ClassId = 2, TeacherId = 2 },
+                           new { ClassId = 3, TeacherId = 3 }
+                       )
+                   );
+
+                c.HasMany(c => c.Students)
+                .WithOne(s => s.Class);
+            });
+            #endregion
+
+            #region Student
+            modelBuilder.Entity<Student>(st =>
+            {
+                st.HasKey(st => st.Id);
+                st.Property(st => st.Id).ValueGeneratedOnAdd();
+                st.Property(st => st.Name).IsRequired();
+                st.Property(st => st.Surname).IsRequired();
+                st.Property(st => st.BirthDate).IsRequired();
+                st.Property(st => st.Address).IsRequired();
+                st.Property(st => st.MobileNumber).IsRequired();
+                st.Property(st => st.Email).IsRequired();
+                st.Property(st => st.Password).IsRequired();
+
+                st.HasMany(st => st.Grades)
+                .WithOne(g => g.Student);
+            });
+            #endregion
+
+            #region Attendance
+            modelBuilder.Entity<Attendance>(a =>
+            {
+                a.HasKey(a => a.Id);
+                a.Property(a => a.Id).ValueGeneratedOnAdd();
+                a.Property(a => a.Date).IsRequired();
+                a.Property(a => a.Present).IsRequired();
+
+                a.HasMany(a => a.Students)
+                .WithMany(s => s.Attendances)
+                .UsingEntity<Dictionary<string, object>>(
+                    "AttendanceStudent",
+                    x => x.HasOne<Student>().WithMany().HasForeignKey("StudentId"),
+                    x => x.HasOne<Attendance>().WithMany().HasForeignKey("AttendanceId"),
+                    x => x.HasData(
+                        new { AttendanceId = 1, StudentId = 1 },
+                        new { AttendanceId = 2, StudentId = 2 },
+                        new { AttendanceId = 3, StudentId = 3 }
+                    )
+                );
+
+                a.HasMany(a => a.Teachers)
+                .WithMany(t => t.Attendances)
+                .UsingEntity<Dictionary<string, object>>(
+                    "AttendanceTeacher",
+                    x => x.HasOne<Teacher>().WithMany().HasForeignKey("TeacherId"),
+                    x => x.HasOne<Attendance>().WithMany().HasForeignKey("AttendanceId"),
+                    x => x.HasData(
+                        new { AttendanceId = 1, TeacherId = 1 },
+                        new { AttendanceId = 2, TeacherId = 2 },
+                        new { AttendanceId = 3, TeacherId = 3 }
+                    )
+                );
+            });
+            #endregion
+
+            #region Grade
+            modelBuilder.Entity<Grade>(g =>
+            {
+                g.HasKey(g => g.Id);
+                g.Property(g => g.Id).ValueGeneratedOnAdd();
+                g.Property(g => g.Value).IsRequired();
+                g.Property(g => g.Date).IsRequired();
+
+                g.HasOne(g => g.Subject)
+                .WithMany(sub => sub.Grades);
+            });
+            #endregion
+
+            #region Seeds
+            modelBuilder.ApplyConfiguration(new TeacherSeed());
+            modelBuilder.ApplyConfiguration(new SubjectSeed());
+            modelBuilder.ApplyConfiguration(new ClassSeed());
+            modelBuilder.ApplyConfiguration(new StudentSeed());
+            modelBuilder.ApplyConfiguration(new AttendanceSeed());
+            modelBuilder.ApplyConfiguration(new GradeSeed());
+            #endregion
+        }
+        #endregion
+    }
+}

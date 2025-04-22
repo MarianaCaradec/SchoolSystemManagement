@@ -1,0 +1,168 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|c:\\users\\maric\\source\\repos\\.net\\schoolmanagement\\schoolmanagement.api\\data\\seeds\\gradeseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|solutionrelative:schoolmanagement.api\\data\\seeds\\gradeseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|c:\\users\\maric\\source\\repos\\.net\\schoolmanagement\\schoolmanagement.api\\data\\seeds\\studentseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|solutionrelative:schoolmanagement.api\\data\\seeds\\studentseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|c:\\users\\maric\\source\\repos\\.net\\schoolmanagement\\schoolmanagement.api\\data\\context\\schoolsysdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|solutionrelative:schoolmanagement.api\\data\\context\\schoolsysdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|c:\\users\\maric\\source\\repos\\.net\\schoolmanagement\\schoolmanagement.api\\data\\seeds\\subjectseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|solutionrelative:schoolmanagement.api\\data\\seeds\\subjectseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|c:\\users\\maric\\source\\repos\\.net\\schoolmanagement\\schoolmanagement.api\\data\\seeds\\teacherseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|solutionrelative:schoolmanagement.api\\data\\seeds\\teacherseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|c:\\users\\maric\\source\\repos\\.net\\schoolmanagement\\schoolmanagement.api\\data\\seeds\\classseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|solutionrelative:schoolmanagement.api\\data\\seeds\\classseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|c:\\users\\maric\\source\\repos\\.net\\schoolmanagement\\schoolmanagement.api\\data\\seeds\\attendanceseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|solutionrelative:schoolmanagement.api\\data\\seeds\\attendanceseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 5,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "SchoolSysDBContext.cs",
+              "DocumentMoniker": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\Data\\Context\\SchoolSysDBContext.cs",
+              "RelativeDocumentMoniker": "SchoolManagement.API\\Data\\Context\\SchoolSysDBContext.cs",
+              "ToolTip": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\Data\\Context\\SchoolSysDBContext.cs",
+              "RelativeToolTip": "SchoolManagement.API\\Data\\Context\\SchoolSysDBContext.cs",
+              "ViewState": "AgIAAIsAAAAAAAAAAAAswIwAAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-22T14:57:11.589Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "TeacherSeed.cs",
+              "DocumentMoniker": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\Data\\Seeds\\TeacherSeed.cs",
+              "RelativeDocumentMoniker": "SchoolManagement.API\\Data\\Seeds\\TeacherSeed.cs",
+              "ToolTip": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\Data\\Seeds\\TeacherSeed.cs",
+              "RelativeToolTip": "SchoolManagement.API\\Data\\Seeds\\TeacherSeed.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAAwCsAAAAsAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-22T19:32:49.302Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "SubjectSeed.cs",
+              "DocumentMoniker": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\Data\\Seeds\\SubjectSeed.cs",
+              "RelativeDocumentMoniker": "SchoolManagement.API\\Data\\Seeds\\SubjectSeed.cs",
+              "ToolTip": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\Data\\Seeds\\SubjectSeed.cs",
+              "RelativeToolTip": "SchoolManagement.API\\Data\\Seeds\\SubjectSeed.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAABBAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-22T20:15:06.228Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "ClassSeed.cs",
+              "DocumentMoniker": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\Data\\Seeds\\ClassSeed.cs",
+              "RelativeDocumentMoniker": "SchoolManagement.API\\Data\\Seeds\\ClassSeed.cs",
+              "ToolTip": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\Data\\Seeds\\ClassSeed.cs",
+              "RelativeToolTip": "SchoolManagement.API\\Data\\Seeds\\ClassSeed.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAACIAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-22T20:43:31.782Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "StudentSeed.cs",
+              "DocumentMoniker": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\Data\\Seeds\\StudentSeed.cs",
+              "RelativeDocumentMoniker": "SchoolManagement.API\\Data\\Seeds\\StudentSeed.cs",
+              "ToolTip": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\Data\\Seeds\\StudentSeed.cs",
+              "RelativeToolTip": "SchoolManagement.API\\Data\\Seeds\\StudentSeed.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAAwC0AAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-22T20:48:58.05Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "GradeSeed.cs",
+              "DocumentMoniker": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\Data\\Seeds\\GradeSeed.cs",
+              "RelativeDocumentMoniker": "SchoolManagement.API\\Data\\Seeds\\GradeSeed.cs",
+              "ToolTip": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\Data\\Seeds\\GradeSeed.cs",
+              "RelativeToolTip": "SchoolManagement.API\\Data\\Seeds\\GradeSeed.cs",
+              "ViewState": "AgIAABAAAAAAAAAAAAAswCEAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-22T20:50:25.445Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "AttendanceSeed.cs",
+              "DocumentMoniker": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\Data\\Seeds\\AttendanceSeed.cs",
+              "RelativeDocumentMoniker": "SchoolManagement.API\\Data\\Seeds\\AttendanceSeed.cs",
+              "ToolTip": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\Data\\Seeds\\AttendanceSeed.cs",
+              "RelativeToolTip": "SchoolManagement.API\\Data\\Seeds\\AttendanceSeed.cs",
+              "ViewState": "AgIAAAgAAAAAAAAAAAAAwB8AAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-04-22T20:47:32.101Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{6d4078d1-5951-4ed1-ac0e-0a8099c1cce5}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{0174dea2-fdbe-4ef1-8f99-c0beae78880f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
