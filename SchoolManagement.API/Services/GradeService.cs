@@ -59,7 +59,9 @@ namespace SchoolManagement.API.Services
 
         public async Task<Grade> UpdateGradeAsync(int id, Grade gradeToBeUpdated, int studentId, int subjectId)
         {
-            Grade grade = await _context.Grades.FindAsync(id);
+            Grade grade = await _context.Grades
+                .Include(g => g.Student)
+                .FirstOrDefaultAsync(g => g.Id == id);
 
             if (grade == null) throw new KeyNotFoundException($"Grade with ID {id} not found");
 
