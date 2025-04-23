@@ -9,7 +9,7 @@ namespace SchoolManagement.API.Services
     {
         private readonly SchoolSysDBContext _context = context;
 
-        public async Task<IEnumerable<Subject>> GetAllSubjectsAsync()
+        public async Task<IEnumerable<Subject>> GetSubjectsAsync()
         {
             return await _context.Subjects
                 .Include(sub => sub.Teachers)
