@@ -14,6 +14,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<ITeacherService, TeacherService>();
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
+builder.Services.AddScoped<IClassService, ClassService>();
 
 builder.Services.AddDbContext<SchoolSysDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SchoolSysDBConnection")));
