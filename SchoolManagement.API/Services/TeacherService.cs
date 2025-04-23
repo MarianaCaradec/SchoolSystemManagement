@@ -32,7 +32,10 @@ namespace SchoolManagement.API.Services
 
         public async Task<Teacher> GetTeacherByIdAsync(int id)
         {
-            var teacher = await _context.Teachers.FirstOrDefaultAsync(t => t.Id == id);
+            Teacher teacher = await _context.Teachers
+                .Include(t => t.Subjects)
+                .Include(t => t.Classes)
+                .FirstOrDefaultAsync(t => t.Id == id);
 
             if (teacher == null) throw new KeyNotFoundException($"Teacher with ID {id} not found.");
 
@@ -58,7 +61,7 @@ namespace SchoolManagement.API.Services
                 createdTeacher.Id = random.Next(1, int.MaxValue);
             }
 
-            await _context.AddAsync(createdTeacher);
+            _context.Add(createdTeacher);
             await _context.SaveChangesAsync();
 
             return createdTeacher;
@@ -85,6 +88,7 @@ namespace SchoolManagement.API.Services
             updatedTeacher.Classes = teacherToBeUpdated.Classes;
             updatedTeacher.Attendances = teacherToBeUpdated.Attendances;
 
+            _context.Update(updatedTeacher);
             await _context.SaveChangesAsync();
 
             return updatedTeacher;
