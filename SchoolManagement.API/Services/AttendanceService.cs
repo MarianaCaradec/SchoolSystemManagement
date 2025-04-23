@@ -85,6 +85,7 @@ namespace SchoolManagement.API.Services
             if (attendanceToBeDeleted == null) throw new KeyNotFoundException($"Attendance with ID {id} not found.");
 
             _context.Attendances.Remove(attendanceToBeDeleted);
+            await _context.SaveChangesAsync();
 
             return true;
         }
