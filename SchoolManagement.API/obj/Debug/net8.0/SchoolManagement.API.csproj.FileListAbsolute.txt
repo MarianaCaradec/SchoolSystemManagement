@@ -271,7 +271,6 @@ C:\Users\maric\Documents\repos\.NET\SchoolManagement\SchoolManagement.API\obj\De
 C:\Users\maric\Documents\repos\.NET\SchoolManagement\SchoolManagement.API\obj\Debug\net8.0\staticwebassets\msbuild.buildMultiTargeting.SchoolManagement.API.props
 C:\Users\maric\Documents\repos\.NET\SchoolManagement\SchoolManagement.API\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.SchoolManagement.API.props
 C:\Users\maric\Documents\repos\.NET\SchoolManagement\SchoolManagement.API\obj\Debug\net8.0\staticwebassets.pack.json
-C:\Users\maric\Documents\repos\.NET\SchoolManagement\SchoolManagement.API\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 C:\Users\maric\Documents\repos\.NET\SchoolManagement\SchoolManagement.API\obj\Debug\net8.0\SchoolMa.ECADDB02.Up2Date
 C:\Users\maric\Documents\repos\.NET\SchoolManagement\SchoolManagement.API\obj\Debug\net8.0\SchoolManagement.API.dll
 C:\Users\maric\Documents\repos\.NET\SchoolManagement\SchoolManagement.API\obj\Debug\net8.0\refint\SchoolManagement.API.dll
