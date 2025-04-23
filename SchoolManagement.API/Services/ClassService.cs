@@ -20,8 +20,8 @@ namespace SchoolManagement.API.Services
                     Course = c.Course,
                     Divition = c.Divition,
                     Capacity = c.Capacity,
-                    Teachers = c.Teachers,
-                    Students = c.Students
+                    Teachers = c.Teachers.ToList(),
+                    Students = c.Students.ToList()
                 }).ToListAsync();
         }
 
