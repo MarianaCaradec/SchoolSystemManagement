@@ -17,6 +17,7 @@ builder.Services.AddScoped<IAttendanceService, AttendanceService>();
 builder.Services.AddScoped<IClassService, ClassService>();
 builder.Services.AddScoped<IGradeService, GradeService>();
 builder.Services.AddScoped<IStudentService, StudentService>();
+builder.Services.AddScoped<ISubjectService, SubjectService>();
 
 builder.Services.AddDbContext<SchoolSysDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SchoolSysDBConnection")));
