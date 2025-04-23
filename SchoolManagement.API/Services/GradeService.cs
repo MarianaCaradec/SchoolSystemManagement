@@ -18,8 +18,8 @@ namespace SchoolManagement.API.Services
                     Id = g.Id,
                     Value = g.Value,
                     Date = g.Date,
-                    StudentId = g.StudentId,
-                    SubjectId = g.SubjectId
+                    Student = g.Student,
+                    Subject = g.Subject
 
                 }) .ToListAsync();
         }
