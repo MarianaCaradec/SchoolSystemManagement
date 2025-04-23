@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.Blazor\\SchoolManagement.Blazor.csproj": {}
+    "C:\\Users\\maric\\Documents\\repos\\.NET\\SchoolManagement\\SchoolManagement.Blazor\\SchoolManagement.Blazor.csproj": {}
   },
   "projects": {
-    "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.Blazor\\SchoolManagement.Blazor.csproj": {
+    "C:\\Users\\maric\\Documents\\repos\\.NET\\SchoolManagement\\SchoolManagement.Blazor\\SchoolManagement.Blazor.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.Blazor\\SchoolManagement.Blazor.csproj",
+        "projectUniqueName": "C:\\Users\\maric\\Documents\\repos\\.NET\\SchoolManagement\\SchoolManagement.Blazor\\SchoolManagement.Blazor.csproj",
         "projectName": "SchoolManagement.Blazor",
-        "projectPath": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.Blazor\\SchoolManagement.Blazor.csproj",
+        "projectPath": "C:\\Users\\maric\\Documents\\repos\\.NET\\SchoolManagement\\SchoolManagement.Blazor\\SchoolManagement.Blazor.csproj",
         "packagesPath": "C:\\Users\\maric\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.Blazor\\obj\\",
+        "outputPath": "C:\\Users\\maric\\Documents\\repos\\.NET\\SchoolManagement\\SchoolManagement.Blazor\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

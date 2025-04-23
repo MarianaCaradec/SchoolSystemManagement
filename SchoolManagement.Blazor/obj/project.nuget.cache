@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "7nsvTb8LmOk=",
+  "dgSpecHash": "gUES8ciT14M=",
   "success": true,
-  "projectFilePath": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.Blazor\\SchoolManagement.Blazor.csproj",
+  "projectFilePath": "C:\\Users\\maric\\Documents\\repos\\.NET\\SchoolManagement\\SchoolManagement.Blazor\\SchoolManagement.Blazor.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\maric\\.nuget\\packages\\microsoft.aspnetcore.authorization\\8.0.15\\microsoft.aspnetcore.authorization.8.0.15.nupkg.sha512",
     "C:\\Users\\maric\\.nuget\\packages\\microsoft.aspnetcore.components\\8.0.15\\microsoft.aspnetcore.components.8.0.15.nupkg.sha512",

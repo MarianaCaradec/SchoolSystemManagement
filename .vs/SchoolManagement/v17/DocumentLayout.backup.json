@@ -3,6 +3,14 @@
   "WorkspaceRootPath": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|c:\\users\\maric\\source\\repos\\.net\\schoolmanagement\\schoolmanagement.api\\data\\seeds\\gradeseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|solutionrelative:schoolmanagement.api\\data\\seeds\\gradeseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|c:\\users\\maric\\source\\repos\\.net\\schoolmanagement\\schoolmanagement.api\\data\\seeds\\studentseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|solutionrelative:schoolmanagement.api\\data\\seeds\\studentseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|c:\\users\\maric\\source\\repos\\.net\\schoolmanagement\\schoolmanagement.api\\data\\context\\schoolsysdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|solutionrelative:schoolmanagement.api\\data\\context\\schoolsysdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
@@ -19,14 +27,6 @@
       "RelativeMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|solutionrelative:schoolmanagement.api\\data\\seeds\\classseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|c:\\users\\maric\\source\\repos\\.net\\schoolmanagement\\schoolmanagement.api\\data\\seeds\\studentseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|solutionrelative:schoolmanagement.api\\data\\seeds\\studentseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|c:\\users\\maric\\source\\repos\\.net\\schoolmanagement\\schoolmanagement.api\\data\\seeds\\gradeseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|solutionrelative:schoolmanagement.api\\data\\seeds\\gradeseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|c:\\users\\maric\\source\\repos\\.net\\schoolmanagement\\schoolmanagement.api\\data\\seeds\\attendanceseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{678C810E-DC7C-4D48-9D1F-151122822EA2}|SchoolManagement.API\\SchoolManagement.API.csproj|solutionrelative:schoolmanagement.api\\data\\seeds\\attendanceseed.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
@@ -38,17 +38,17 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "SchoolSysDBContext.cs",
               "DocumentMoniker": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\Data\\Context\\SchoolSysDBContext.cs",
               "RelativeDocumentMoniker": "SchoolManagement.API\\Data\\Context\\SchoolSysDBContext.cs",
               "ToolTip": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\Data\\Context\\SchoolSysDBContext.cs",
               "RelativeToolTip": "SchoolManagement.API\\Data\\Context\\SchoolSysDBContext.cs",
-              "ViewState": "AgIAACcAAAAAAAAAAAAswCcAAAArAAAAAAAAAA==",
+              "ViewState": "AgIAAIsAAAAAAAAAAAAswIwAAAAQAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-04-22T14:57:11.589Z",
               "IsPinned": true,
@@ -56,7 +56,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "TeacherSeed.cs",
               "DocumentMoniker": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\Data\\Seeds\\TeacherSeed.cs",
               "RelativeDocumentMoniker": "SchoolManagement.API\\Data\\Seeds\\TeacherSeed.cs",
@@ -69,7 +69,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "SubjectSeed.cs",
               "DocumentMoniker": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\Data\\Seeds\\SubjectSeed.cs",
               "RelativeDocumentMoniker": "SchoolManagement.API\\Data\\Seeds\\SubjectSeed.cs",
@@ -82,7 +82,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "ClassSeed.cs",
               "DocumentMoniker": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\Data\\Seeds\\ClassSeed.cs",
               "RelativeDocumentMoniker": "SchoolManagement.API\\Data\\Seeds\\ClassSeed.cs",
@@ -95,7 +95,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 1,
               "Title": "StudentSeed.cs",
               "DocumentMoniker": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\Data\\Seeds\\StudentSeed.cs",
               "RelativeDocumentMoniker": "SchoolManagement.API\\Data\\Seeds\\StudentSeed.cs",
@@ -108,13 +108,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 0,
               "Title": "GradeSeed.cs",
               "DocumentMoniker": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\Data\\Seeds\\GradeSeed.cs",
               "RelativeDocumentMoniker": "SchoolManagement.API\\Data\\Seeds\\GradeSeed.cs",
               "ToolTip": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\Data\\Seeds\\GradeSeed.cs",
               "RelativeToolTip": "SchoolManagement.API\\Data\\Seeds\\GradeSeed.cs",
-              "ViewState": "AgIAAA0AAAAAAAAAAAAswCEAAAAiAAAAAAAAAA==",
+              "ViewState": "AgIAABAAAAAAAAAAAAAswCEAAAAiAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-04-22T20:50:25.445Z",
               "EditorCaption": ""

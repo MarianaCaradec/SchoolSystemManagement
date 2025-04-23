@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "s+/gN+ai9ME=",
+  "dgSpecHash": "0Jd0UJgUX8g=",
   "success": true,
-  "projectFilePath": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\SchoolManagement.API.csproj",
+  "projectFilePath": "C:\\Users\\maric\\Documents\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\SchoolManagement.API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\maric\\.nuget\\packages\\azure.core\\1.25.0\\azure.core.1.25.0.nupkg.sha512",
     "C:\\Users\\maric\\.nuget\\packages\\azure.identity\\1.7.0\\azure.identity.1.7.0.nupkg.sha512",

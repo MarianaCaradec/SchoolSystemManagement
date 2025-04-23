@@ -4458,11 +4458,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\SchoolManagement.API.csproj",
+      "projectUniqueName": "C:\\Users\\maric\\Documents\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\SchoolManagement.API.csproj",
       "projectName": "SchoolManagement.API",
-      "projectPath": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\SchoolManagement.API.csproj",
+      "projectPath": "C:\\Users\\maric\\Documents\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\SchoolManagement.API.csproj",
       "packagesPath": "C:\\Users\\maric\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\maric\\source\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\obj\\",
+      "outputPath": "C:\\Users\\maric\\Documents\\repos\\.NET\\SchoolManagement\\SchoolManagement.API\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
