@@ -36,11 +36,13 @@ namespace SchoolManagement.API.Data.Context
 
                 u.HasOne(u => u.Teacher)
                  .WithOne(t => t.User)
-                 .HasForeignKey<Teacher>(t => t.UserId);
+                 .HasForeignKey<Teacher>(t => t.UserId)
+                 .IsRequired();
 
                 u.HasOne(u => u.Student)
                  .WithOne(s => s.User)
-                 .HasForeignKey<Student>(s => s.UserId);
+                 .HasForeignKey<Student>(s => s.UserId)
+                 .IsRequired();
             });
             #endregion
 
@@ -54,8 +56,6 @@ namespace SchoolManagement.API.Data.Context
                 t.Property(t => t.BirthDate).IsRequired();
                 t.Property(t => t.Address).IsRequired();
                 t.Property(t => t.MobileNumber).IsRequired();
-                t.Property(t => t.Email).IsRequired();
-                t.Property(t => t.Password).IsRequired();
             });
             #endregion
 
@@ -119,8 +119,6 @@ namespace SchoolManagement.API.Data.Context
                 st.Property(st => st.BirthDate).IsRequired();
                 st.Property(st => st.Address).IsRequired();
                 st.Property(st => st.MobileNumber).IsRequired();
-                st.Property(st => st.Email).IsRequired();
-                st.Property(st => st.Password).IsRequired();
 
                 st.HasMany(st => st.Grades)
                 .WithOne(g => g.Student)
@@ -160,6 +158,7 @@ namespace SchoolManagement.API.Data.Context
             #endregion
 
             #region Seeds
+            modelBuilder.ApplyConfiguration(new UserSeed());
             modelBuilder.ApplyConfiguration(new TeacherSeed());
             modelBuilder.ApplyConfiguration(new SubjectSeed());
             modelBuilder.ApplyConfiguration(new ClassSeed());

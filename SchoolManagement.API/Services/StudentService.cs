@@ -23,8 +23,7 @@ namespace SchoolManagement.API.Services
                     BirthDate = st.BirthDate,
                     Address = st.Address,
                     MobileNumber = st.MobileNumber,
-                    Email = st.Email,
-                    Password = st.Password,
+                    User = st.User,
                     Class = st.Class,
                     Attendances = st.Attendances.ToList(),
                     Grades = st.Grades.ToList()
@@ -34,6 +33,7 @@ namespace SchoolManagement.API.Services
         public async Task<Student> GetStudentByIdAsync(int id)
         {
             Student student = await _context.Students
+                .Include(st => st.User)
                 .Include(st => st.Class)
                 .Include(st => st.Attendances)
                 .Include(st => st.Grades)
@@ -53,8 +53,7 @@ namespace SchoolManagement.API.Services
                 BirthDate = studentToBeCreated.BirthDate,
                 Address = studentToBeCreated.Address,
                 MobileNumber = studentToBeCreated.MobileNumber,
-                Email = studentToBeCreated.Email,
-                Password = studentToBeCreated.Password,
+                UserId = studentToBeCreated.UserId,
                 ClassId = studentToBeCreated.ClassId
             };
 
@@ -73,6 +72,7 @@ namespace SchoolManagement.API.Services
         public async Task<Student> UpdateStudentAsync(int id, Student studentToBeUpdated, int classId)
         {
             Student updatedStudent = await _context.Students
+                .Include(st => st.User)
                 .Include(st => st.Class)
                 .Include(st => st.Attendances)
                 .Include(st => st.Grades)
@@ -83,8 +83,7 @@ namespace SchoolManagement.API.Services
             updatedStudent.BirthDate = studentToBeUpdated.BirthDate;
             updatedStudent.Address = studentToBeUpdated.Address;
             updatedStudent.MobileNumber = studentToBeUpdated.MobileNumber;
-            updatedStudent.Email = studentToBeUpdated.Email;
-            updatedStudent.Password = studentToBeUpdated.Password;
+            updatedStudent.User = studentToBeUpdated.User;
             updatedStudent.ClassId = classId;
             updatedStudent.Attendances = studentToBeUpdated.Attendances;
             updatedStudent.Grades = studentToBeUpdated.Grades;

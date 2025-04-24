@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SchoolManagement.API.Data.Context;
 
@@ -11,9 +12,11 @@ using SchoolManagement.API.Data.Context;
 namespace SchoolManagement.API.Migrations
 {
     [DbContext(typeof(SchoolSysDBContext))]
-    partial class SchoolSysDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250424150627_UserTableWithRoles")]
+    partial class UserTableWithRoles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -81,50 +84,6 @@ namespace SchoolManagement.API.Migrations
                     b.HasIndex("TeacherId");
 
                     b.ToTable("Attendances");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Date = new DateOnly(2025, 4, 22),
-                            Present = true,
-                            StudentId = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Date = new DateOnly(2025, 4, 21),
-                            Present = false,
-                            StudentId = 2
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Date = new DateOnly(2025, 4, 20),
-                            Present = true,
-                            StudentId = 3
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Date = new DateOnly(2025, 2, 20),
-                            Present = true,
-                            TeacherId = 1
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Date = new DateOnly(2025, 4, 14),
-                            Present = false,
-                            TeacherId = 2
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Date = new DateOnly(2025, 1, 9),
-                            Present = true,
-                            TeacherId = 3
-                        });
                 });
 
             modelBuilder.Entity("SchoolManagement.API.Models.Class", b =>
@@ -149,29 +108,6 @@ namespace SchoolManagement.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Classes");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Capacity = 30,
-                            Course = "4th Grade",
-                            Divition = "A"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Capacity = 25,
-                            Course = "5th Grade",
-                            Divition = "B"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Capacity = 28,
-                            Course = "6th Grade",
-                            Divition = "C"
-                        });
                 });
 
             modelBuilder.Entity("SchoolManagement.API.Models.Grade", b =>
@@ -201,32 +137,6 @@ namespace SchoolManagement.API.Migrations
                     b.HasIndex("SubjectId");
 
                     b.ToTable("Grades");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Date = new DateOnly(2025, 4, 22),
-                            StudentId = 1,
-                            SubjectId = 1,
-                            Value = 85
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Date = new DateOnly(2025, 4, 20),
-                            StudentId = 2,
-                            SubjectId = 2,
-                            Value = 90
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Date = new DateOnly(2025, 4, 18),
-                            StudentId = 3,
-                            SubjectId = 3,
-                            Value = 75
-                        });
                 });
 
             modelBuilder.Entity("SchoolManagement.API.Models.Student", b =>
@@ -269,41 +179,6 @@ namespace SchoolManagement.API.Migrations
                         .IsUnique();
 
                     b.ToTable("Students");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Address = "123 Calle Falsa, Paraná",
-                            BirthDate = new DateOnly(2005, 6, 15),
-                            ClassId = 1,
-                            MobileNumber = 5493415123456L,
-                            Name = "Sofía",
-                            Surname = "Pérez",
-                            UserId = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Address = "456 Avenida Siempre Viva, Paraná",
-                            BirthDate = new DateOnly(2006, 10, 22),
-                            ClassId = 2,
-                            MobileNumber = 5493415234567L,
-                            Name = "Lucas",
-                            Surname = "Ramírez",
-                            UserId = 2
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Address = "789 Boulevard Independencia, Paraná",
-                            BirthDate = new DateOnly(2004, 3, 8),
-                            ClassId = 3,
-                            MobileNumber = 5493415345678L,
-                            Name = "Camila",
-                            Surname = "González",
-                            UserId = 3
-                        });
                 });
 
             modelBuilder.Entity("SchoolManagement.API.Models.Subject", b =>
@@ -321,23 +196,6 @@ namespace SchoolManagement.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Subjects");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Title = "Mathematics"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Title = "Physics"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Title = "History"
-                        });
                 });
 
             modelBuilder.Entity("SchoolManagement.API.Models.Teacher", b =>
@@ -375,38 +233,6 @@ namespace SchoolManagement.API.Migrations
                         .IsUnique();
 
                     b.ToTable("Teachers");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Address = "123 Calle Falsa, Buenos Aires",
-                            BirthDate = new DateOnly(2000, 5, 20),
-                            MobileNumber = 541112345678L,
-                            Name = "Juan",
-                            Surname = "González",
-                            UserId = 4
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Address = "456 Avenida Siempre Viva, Córdoba",
-                            BirthDate = new DateOnly(2001, 8, 15),
-                            MobileNumber = 541198765432L,
-                            Name = "María",
-                            Surname = "Fernández",
-                            UserId = 5
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Address = "789 Boulevard Independencia, Mendoza",
-                            BirthDate = new DateOnly(1999, 12, 10),
-                            MobileNumber = 541165432987L,
-                            Name = "Carlos",
-                            Surname = "Martínez",
-                            UserId = 6
-                        });
                 });
 
             modelBuilder.Entity("SchoolManagement.API.Models.User", b =>
@@ -432,50 +258,6 @@ namespace SchoolManagement.API.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Email = "pepitoaurelio@test.com",
-                            Password = "hashedpassword645",
-                            Role = "Student"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Email = "martamaria@test.com",
-                            Password = "hashedpassword547",
-                            Role = "Student"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Email = "rosalopez@test.com",
-                            Password = "hashedpassword687",
-                            Role = "Student"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Email = "roberto@test.com",
-                            Password = "hashedpassword79889",
-                            Role = "Teacher"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Email = "tatamartino@test.com",
-                            Password = "hashedpassword98347",
-                            Role = "Teacher"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            Email = "roccototo@test.com",
-                            Password = "hashedpassword8437",
-                            Role = "Teacher"
-                        });
                 });
 
             modelBuilder.Entity("SubjectTeacher", b =>

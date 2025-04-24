@@ -18,8 +18,7 @@ namespace SchoolManagement.API.Data.Seeds
                 BirthDate = new DateOnly(2000, 5, 20),
                 Address = "123 Calle Falsa, Buenos Aires",
                 MobileNumber = 541112345678,
-                Email = "juan.gonzalez@example.com",
-                Password = "hashedpassword1"
+                UserId = 4,
             },
             new Teacher
             {
@@ -29,8 +28,7 @@ namespace SchoolManagement.API.Data.Seeds
                 BirthDate = new DateOnly(2001, 8, 15),
                 Address = "456 Avenida Siempre Viva, Córdoba",
                 MobileNumber = 541198765432,
-                Email = "maria.fernandez@example.com",
-                Password = "hashedpassword2"
+                UserId = 5,
             },
             new Teacher
             {
@@ -40,8 +38,7 @@ namespace SchoolManagement.API.Data.Seeds
                 BirthDate = new DateOnly(1999, 12, 10),
                 Address = "789 Boulevard Independencia, Mendoza",
                 MobileNumber = 541165432987,
-                Email = "carlos.martinez@example.com",
-                Password = "hashedpassword3"
+                UserId = 6,
             }
             );
         }

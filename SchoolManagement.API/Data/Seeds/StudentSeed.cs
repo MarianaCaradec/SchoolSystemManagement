@@ -17,8 +17,7 @@ namespace SchoolManagement.API.Data.Seeds
                     BirthDate = new DateOnly(2005, 6, 15),
                     Address = "123 Calle Falsa, Paraná",
                     MobileNumber = 5493415123456,
-                    Email = "sofia.perez@example.com",
-                    Password = "hashedpassword1",
+                    UserId = 1,
                     ClassId = 1
                 },
                 new Student
@@ -29,8 +28,7 @@ namespace SchoolManagement.API.Data.Seeds
                     BirthDate = new DateOnly(2006, 10, 22),
                     Address = "456 Avenida Siempre Viva, Paraná",
                     MobileNumber = 5493415234567,
-                    Email = "lucas.ramirez@example.com",
-                    Password = "hashedpassword2",
+                    UserId = 2,
                     ClassId = 2 
                 },
                 new Student
@@ -41,8 +39,7 @@ namespace SchoolManagement.API.Data.Seeds
                     BirthDate = new DateOnly(2004, 3, 8),
                     Address = "789 Boulevard Independencia, Paraná",
                     MobileNumber = 5493415345678,
-                    Email = "camila.gonzalez@example.com",
-                    Password = "hashedpassword3",
+                    UserId = 3,
                     ClassId = 3
                 }
             );

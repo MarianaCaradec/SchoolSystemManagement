@@ -12,6 +12,7 @@ namespace SchoolManagement.API.Services
         public async Task<IEnumerable<Teacher>> GetTeachersAsync()
         {
             return await _context.Teachers
+                .Include(t => t.User)
                 .Include(t => t.Subjects)
                 .Include(t => t.Classes)
                 .Select(t => new Teacher
@@ -22,8 +23,7 @@ namespace SchoolManagement.API.Services
                     BirthDate = t.BirthDate,
                     Address = t.Address,
                     MobileNumber = t.MobileNumber,
-                    Email = t.Email,
-                    Password = t.Password,
+                    User = t.User,
                     Subjects = t.Subjects.ToList(),
                     Classes = t.Classes.ToList(),
                     Attendances = t.Attendances.ToList()
@@ -33,6 +33,7 @@ namespace SchoolManagement.API.Services
         public async Task<Teacher> GetTeacherByIdAsync(int id)
         {
             Teacher teacher = await _context.Teachers
+                .Include(t => t.User)
                 .Include(t => t.Subjects)
                 .Include(t => t.Classes)
                 .FirstOrDefaultAsync(t => t.Id == id);
@@ -51,8 +52,7 @@ namespace SchoolManagement.API.Services
                 BirthDate = teacherToBeCreated.BirthDate,
                 Address = teacherToBeCreated.Address,
                 MobileNumber = teacherToBeCreated.MobileNumber,
-                Email = teacherToBeCreated.Email,
-                Password = teacherToBeCreated.Password,
+                UserId = teacherToBeCreated.UserId,
             };
 
             if (createdTeacher.Id == null || createdTeacher.Id == 0)
@@ -71,6 +71,7 @@ namespace SchoolManagement.API.Services
         public async Task<Teacher> UpdateTeacherAsync(int id, Teacher teacherToBeUpdated)
         {
             Teacher updatedTeacher = await _context.Teachers
+                .Include(t => t.User)
                 .Include(t => t.Subjects)
                 .Include(t => t.Classes)
                 .Include(t => t.Attendances)
@@ -82,8 +83,7 @@ namespace SchoolManagement.API.Services
             updatedTeacher.Surname = teacherToBeUpdated.Surname;
             updatedTeacher.BirthDate = teacherToBeUpdated.BirthDate;
             updatedTeacher.MobileNumber = teacherToBeUpdated.MobileNumber;
-            updatedTeacher.Email = teacherToBeUpdated.Email;
-            updatedTeacher.Password = teacherToBeUpdated.Password;
+            updatedTeacher.User = teacherToBeUpdated.User;
             updatedTeacher.Subjects = teacherToBeUpdated.Subjects;
             updatedTeacher.Classes = teacherToBeUpdated.Classes;
             updatedTeacher.Attendances = teacherToBeUpdated.Attendances;
