@@ -8,8 +8,8 @@
         public DateOnly BirthDate { get; set; }
         public string Address { get; set; }
         public long MobileNumber { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
+        public int UserId { get; set; }
+        public User User { get; set; }
         public int ClassId { get; set; }
         public Class Class { get; set; }
         public List<Attendance> Attendances { get; set; } = new();
