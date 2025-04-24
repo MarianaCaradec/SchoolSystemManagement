@@ -5,9 +5,10 @@ using SchoolManagement.API.Models;
 
 namespace SchoolManagement.API.Services
 {
-    public class StudentService(SchoolSysDBContext context) : IStudentService
+    public class StudentService(SchoolSysDBContext context, IUserService userService) : IStudentService
     {
         private readonly SchoolSysDBContext _context = context;
+        private readonly IUserService _userService = userService;
 
         public async Task<IEnumerable<Student>> GetStudentsAsync()
         {
@@ -78,15 +79,28 @@ namespace SchoolManagement.API.Services
                 .Include(st => st.Grades)
                 .FirstOrDefaultAsync(st => st.Id == id);
 
-            updatedStudent.Name = studentToBeUpdated.Name;
-            updatedStudent.Surname = studentToBeUpdated.Surname;
-            updatedStudent.BirthDate = studentToBeUpdated.BirthDate;
-            updatedStudent.Address = studentToBeUpdated.Address;
-            updatedStudent.MobileNumber = studentToBeUpdated.MobileNumber;
-            updatedStudent.User = studentToBeUpdated.User;
-            updatedStudent.ClassId = classId;
-            updatedStudent.Attendances = studentToBeUpdated.Attendances;
-            updatedStudent.Grades = studentToBeUpdated.Grades;
+            if (updatedStudent == null) throw new KeyNotFoundException($"Student with ID {id} not found.");
+
+            await _userService.UpdateUserAsync(updatedStudent.UserId, studentToBeUpdated.User);
+
+            if(studentToBeUpdated.User?.Role == "Admin")
+            {
+                updatedStudent.Name = studentToBeUpdated.Name;
+                updatedStudent.Surname = studentToBeUpdated.Surname;
+                updatedStudent.BirthDate = studentToBeUpdated.BirthDate;
+                updatedStudent.Address = studentToBeUpdated.Address;
+                updatedStudent.MobileNumber = studentToBeUpdated.MobileNumber;
+                updatedStudent.ClassId = classId;
+                updatedStudent.Attendances = studentToBeUpdated.Attendances ?? updatedStudent.Attendances;
+                updatedStudent.Grades = studentToBeUpdated.Grades ?? updatedStudent.Grades;
+            } else if(studentToBeUpdated.User?.Role == "Student")
+            {
+                updatedStudent.Name = studentToBeUpdated.Name;
+                updatedStudent.Surname = studentToBeUpdated.Surname;
+                updatedStudent.BirthDate = studentToBeUpdated.BirthDate;
+                updatedStudent.Address = studentToBeUpdated.Address;
+                updatedStudent.MobileNumber = studentToBeUpdated.MobileNumber;
+            }
 
             _context.Students.Update(updatedStudent);
             await _context.SaveChangesAsync();
