@@ -5,9 +5,10 @@ using SchoolManagement.API.Models;
 
 namespace SchoolManagement.API.Services
 {
-    public class TeacherService(SchoolSysDBContext context) : ITeacherService
+    public class TeacherService(SchoolSysDBContext context, IUserService userService) : ITeacherService
     {
-        private readonly SchoolSysDBContext _context;
+        private readonly SchoolSysDBContext _context = context;
+        private readonly IUserService _userService = userService;
 
         public async Task<IEnumerable<Teacher>> GetTeachersAsync()
         {
@@ -67,7 +68,6 @@ namespace SchoolManagement.API.Services
             return createdTeacher;
         }
 
-        //For admin
         public async Task<Teacher> UpdateTeacherAsync(int id, Teacher teacherToBeUpdated)
         {
             Teacher updatedTeacher = await _context.Teachers
@@ -79,14 +79,24 @@ namespace SchoolManagement.API.Services
 
             if (updatedTeacher == null) throw new KeyNotFoundException($"Teacher with ID {id} not found.");
 
-            updatedTeacher.Name = teacherToBeUpdated.Name;
-            updatedTeacher.Surname = teacherToBeUpdated.Surname;
-            updatedTeacher.BirthDate = teacherToBeUpdated.BirthDate;
-            updatedTeacher.MobileNumber = teacherToBeUpdated.MobileNumber;
-            updatedTeacher.User = teacherToBeUpdated.User;
-            updatedTeacher.Subjects = teacherToBeUpdated.Subjects;
-            updatedTeacher.Classes = teacherToBeUpdated.Classes;
-            updatedTeacher.Attendances = teacherToBeUpdated.Attendances;
+            await _userService.UpdateUserAsync(updatedTeacher.UserId, teacherToBeUpdated.User);
+
+            if(teacherToBeUpdated.User?.Role == "Admin")
+            {
+                updatedTeacher.Name = teacherToBeUpdated.Name;
+                updatedTeacher.Surname = teacherToBeUpdated.Surname;
+                updatedTeacher.BirthDate = teacherToBeUpdated.BirthDate;
+                updatedTeacher.MobileNumber = teacherToBeUpdated.MobileNumber;
+                updatedTeacher.Subjects = teacherToBeUpdated.Subjects ?? updatedTeacher.Subjects;
+                updatedTeacher.Classes = teacherToBeUpdated.Classes ?? updatedTeacher.Classes;
+                updatedTeacher.Attendances = teacherToBeUpdated.Attendances ?? updatedTeacher.Attendances;
+            } else if (teacherToBeUpdated.User?.Role == "Teacher")
+            {
+                updatedTeacher.Name = teacherToBeUpdated.Name;
+                updatedTeacher.Surname = teacherToBeUpdated.Surname;
+                updatedTeacher.BirthDate = teacherToBeUpdated.BirthDate;
+                updatedTeacher.MobileNumber = teacherToBeUpdated.MobileNumber;
+            }
 
             _context.Update(updatedTeacher);
             await _context.SaveChangesAsync();
