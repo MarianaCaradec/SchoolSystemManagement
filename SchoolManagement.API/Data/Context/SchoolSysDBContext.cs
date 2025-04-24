@@ -11,6 +11,7 @@ namespace SchoolManagement.API.Data.Context
 
         #region Properties
 
+        public DbSet<User> Users { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Subject> Subjects { get; set; }
         public DbSet<Class> Classes { get; set; }
@@ -24,6 +25,25 @@ namespace SchoolManagement.API.Data.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            #region User
+            modelBuilder.Entity<User>(u =>
+            {
+                u.HasKey(u => u.Id);
+                u.Property(u => u.Id).ValueGeneratedOnAdd();
+                u.Property(u => u.Email).IsRequired();
+                u.Property(u => u.Password).IsRequired();
+                u.Property(u => u.Role).IsRequired();
+
+                u.HasOne(u => u.Teacher)
+                 .WithOne(t => t.User)
+                 .HasForeignKey<Teacher>(t => t.UserId);
+
+                u.HasOne(u => u.Student)
+                 .WithOne(s => s.User)
+                 .HasForeignKey<Student>(s => s.UserId);
+            });
+            #endregion
+
             #region Teacher 
             modelBuilder.Entity<Teacher>(t =>
             {
