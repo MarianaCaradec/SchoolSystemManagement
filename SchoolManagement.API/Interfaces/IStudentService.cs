@@ -7,7 +7,7 @@ namespace SchoolManagement.API.Interfaces
         Task<IEnumerable<Student>> GetStudentsAsync();
         Task<Student> GetStudentByIdAsync(int id);
         Task<Student> CreateStudentAsync(Student studentToBeCreated);
-        Task<Student> UpdateStudentAsync(int id, Student studentToBeUpdated);
+        Task<Student> UpdateStudentAsync(int id, Student studentToBeUpdated, int classId);
         Task<bool> DeleteStudentAsync(int id);
     }
 }

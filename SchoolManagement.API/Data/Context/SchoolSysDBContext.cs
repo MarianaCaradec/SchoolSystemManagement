@@ -84,7 +84,8 @@ namespace SchoolManagement.API.Data.Context
                    );
 
                 c.HasMany(c => c.Students)
-                .WithOne(s => s.Class);
+                .WithOne(s => s.Class)
+                .HasForeignKey(s => s.ClassId);
             });
             #endregion
 
@@ -102,7 +103,8 @@ namespace SchoolManagement.API.Data.Context
                 st.Property(st => st.Password).IsRequired();
 
                 st.HasMany(st => st.Grades)
-                .WithOne(g => g.Student);
+                .WithOne(g => g.Student)
+                .HasForeignKey(g => g.StudentId);
             });
             #endregion
 
@@ -114,31 +116,13 @@ namespace SchoolManagement.API.Data.Context
                 a.Property(a => a.Date).IsRequired();
                 a.Property(a => a.Present).IsRequired();
 
-                a.HasMany(a => a.Students)
+                a.HasOne(a => a.Student)
                 .WithMany(s => s.Attendances)
-                .UsingEntity<Dictionary<string, object>>(
-                    "AttendanceStudent",
-                    x => x.HasOne<Student>().WithMany().HasForeignKey("StudentId"),
-                    x => x.HasOne<Attendance>().WithMany().HasForeignKey("AttendanceId"),
-                    x => x.HasData(
-                        new { AttendanceId = 1, StudentId = 1 },
-                        new { AttendanceId = 2, StudentId = 2 },
-                        new { AttendanceId = 3, StudentId = 3 }
-                    )
-                );
+                .HasForeignKey(a => a.StudentId);
 
-                a.HasMany(a => a.Teachers)
+                a.HasOne(a => a.Teacher)
                 .WithMany(t => t.Attendances)
-                .UsingEntity<Dictionary<string, object>>(
-                    "AttendanceTeacher",
-                    x => x.HasOne<Teacher>().WithMany().HasForeignKey("TeacherId"),
-                    x => x.HasOne<Attendance>().WithMany().HasForeignKey("AttendanceId"),
-                    x => x.HasData(
-                        new { AttendanceId = 1, TeacherId = 1 },
-                        new { AttendanceId = 2, TeacherId = 2 },
-                        new { AttendanceId = 3, TeacherId = 3 }
-                    )
-                );
+                .HasForeignKey(a => a.TeacherId);
             });
             #endregion
 
