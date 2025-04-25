@@ -20,7 +20,7 @@ namespace SchoolManagement.API.Controllers
         {
             IEnumerable<User> users = await _userService.GetUsersAsync();
 
-            if (users == null || !users.Any()) NoContent();
+            if (users == null || !users.Any()) return NoContent();
 
             return Ok(users);
         }
@@ -31,11 +31,12 @@ namespace SchoolManagement.API.Controllers
         {
             User user = await _userService.GetUserByEmailAsync(email);
 
-            if (user == null) NotFound($"User with the email {email} not found.");
+            if (user == null) return NotFound($"User with the email {email} not found.");
 
             return Ok(user);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUserRole(int id)
         {
@@ -44,8 +45,8 @@ namespace SchoolManagement.API.Controllers
             return Ok(userRole);
         }
 
-            // POST api/<UserController>
-            [HttpPost]
+        // POST api/<UserController>
+        [HttpPost]
         public async Task<ActionResult<User>> PostUser(User userToBeCreated)
         {
             User createdUser = await _userService.CreateUserAsync(userToBeCreated);
@@ -62,13 +63,14 @@ namespace SchoolManagement.API.Controllers
             return Ok(updatedUser);
         }
 
+        [Authorize(Roles = "Admin")]
         // DELETE api/<UserController>/5
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
             await _userService.DeleteUserAsync(id);
 
-            return Ok($"User with ID {id} correctly deleted");
+            return NoContent();
         }
     }
 }
