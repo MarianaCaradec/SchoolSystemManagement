@@ -70,7 +70,7 @@ namespace SchoolManagement.API.Services
             return createdStudent;
         }
 
-        public async Task<Student> UpdateStudentAsync(int id, Student studentToBeUpdated, int classId)
+        public async Task<Student> UpdateStudentAsync(int id, Student studentToBeUpdated)
         {
             Student updatedStudent = await _context.Students
                 .Include(st => st.User)
@@ -90,7 +90,7 @@ namespace SchoolManagement.API.Services
                 updatedStudent.BirthDate = studentToBeUpdated.BirthDate;
                 updatedStudent.Address = studentToBeUpdated.Address;
                 updatedStudent.MobileNumber = studentToBeUpdated.MobileNumber;
-                updatedStudent.ClassId = classId;
+                updatedStudent.ClassId = studentToBeUpdated.ClassId;
                 updatedStudent.Attendances = studentToBeUpdated.Attendances ?? updatedStudent.Attendances;
                 updatedStudent.Grades = studentToBeUpdated.Grades ?? updatedStudent.Grades;
             } else if(studentToBeUpdated.User?.Role == "Student")

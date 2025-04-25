@@ -25,12 +25,12 @@ namespace SchoolManagement.API.Services
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
 
-        public string GetUserRole(int id)
+        public async Task<string> GetUserRole(int id)
         {
-            User user = _context.Users
+            User user = await _context.Users
                 .Include(u => u.Teacher)
                 .Include(u => u.Student)
-                .FirstOrDefault(u => u.Id == id);
+                .FirstOrDefaultAsync(u => u.Id == id);
 
             if (user == null) throw new KeyNotFoundException($"User with ID {id} not found");
 

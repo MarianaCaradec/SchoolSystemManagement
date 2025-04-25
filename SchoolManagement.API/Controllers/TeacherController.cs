@@ -1,0 +1,62 @@
+﻿using Microsoft.AspNetCore.Mvc;
+using SchoolManagement.API.Interfaces;
+using SchoolManagement.API.Models;
+
+// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+
+namespace SchoolManagement.API.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class TeacherController(ITeacherService teacherService) : ControllerBase
+    {
+        private readonly ITeacherService _teacherService = teacherService;
+
+        // GET: api/<ValuesController>
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Teacher>>> GetAllTeachers()
+        {
+            IEnumerable<Teacher> teachers = await _teacherService.GetTeachersAsync();
+
+            if (teachers == null || !teachers.Any()) return NoContent();
+
+            return Ok(teachers);
+        }
+
+        // GET api/<ValuesController>/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Teacher>> GetTeacher(int id)
+        {
+            Teacher teacher = await _teacherService.GetTeacherByIdAsync(id);
+
+            return Ok(teacher);
+        }
+
+        // POST api/<ValuesController>
+        [HttpPost]
+        public async Task<ActionResult<Teacher>> PostTeacher(Teacher teacherToBeCreated)
+        {
+            Teacher createdTeacher = await _teacherService.CreateTeacherAsync(teacherToBeCreated);
+
+            return CreatedAtAction("GetTeacher", new { id = createdTeacher.Id }, createdTeacher);
+        }
+
+        // PUT api/<ValuesController>/5
+        [HttpPut("{id}")]
+        public async Task<ActionResult<Teacher>> PutTeacher(int id, Teacher teacherToBeUpdated)
+        {
+            Teacher updatedTeacher = await _teacherService.UpdateTeacherAsync(id, teacherToBeUpdated);
+
+            return Ok(updatedTeacher);
+        }
+
+        // DELETE api/<ValuesController>/5
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<bool>> DeleteTeacher(int id)
+        {
+            await _teacherService.DeleteTeacherAsync(id); 
+            
+            return NoContent();
+        }
+    }
+}
