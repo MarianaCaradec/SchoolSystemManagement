@@ -4,10 +4,10 @@ namespace SchoolManagement.API.Interfaces
 {
     public interface IGradeService
     {
-        Task<IEnumerable<Grade>> GetGradesAsync();
-        Task<Grade> GetGradeByIdAsync(int id);
-        Task<Grade> CreateGradeAsync(Grade gradeToBeCreated);
-        Task<Grade> UpdateGradeAsync(int id, Grade gradeToBeUpdated, int studentId, int subjectId);
-        Task<bool> DeleteGradeAsync(int id);
+        Task<IEnumerable<Grade>> GetGradesAsync(int userId);
+        Task<Grade> GetGradeByIdAsync(int id, int userId);
+        Task<Grade> CreateGradeAsync(Grade gradeToBeCreated, int userId);
+        Task<Grade> UpdateGradeAsync(int id, Grade gradeToBeUpdated, int studentId, int subjectId, int userId);
+        Task<bool> DeleteGradeAsync(int id, int userId);
     }
 }
