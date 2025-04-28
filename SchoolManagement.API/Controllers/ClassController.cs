@@ -18,9 +18,9 @@ namespace SchoolManagement.API.Controllers
 
         // GET: api/<ClassController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Class>>> GetAllClasses()
+        public async Task<ActionResult<IEnumerable<Class>>> GetAllClasses(int userId)
         {
-            IEnumerable<Class> classes = await _classService.GetClassesAsync();
+            IEnumerable<Class> classes = await _classService.GetClassesAsync(userId);
 
             if (classes == null || !classes.Any()) return NoContent();
 
@@ -29,36 +29,36 @@ namespace SchoolManagement.API.Controllers
 
         // GET api/<ClassController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Class>> GetClass(int id)
+        public async Task<ActionResult<Class>> GetClass(int id, int userId)
         {
-            Class classById = await _classService.GetClassByIdAsync(id);
+            Class classById = await _classService.GetClassByIdAsync(id, userId);
 
             return Ok(classById);
         }
 
         // POST api/<ClassController>
         [HttpPost]
-        public async Task<ActionResult<Class>> PostClass(Class classToBeCreated)
+        public async Task<ActionResult<Class>> PostClass(Class classToBeCreated, int userId)
         {
-            Class createdClass = await _classService.CreateClassAsync(classToBeCreated);
+            Class createdClass = await _classService.CreateClassAsync(classToBeCreated, userId);
 
             return CreatedAtAction("GetClass", new { id = createdClass.Id }, createdClass);
         }
 
         // PUT api/<ClassController>/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<Class>> PutClass(int id, Class classToBeUpdated)
+        public async Task<ActionResult<Class>> PutClass(int id, Class classToBeUpdated, int userId)
         {
-            Class updatedClass = await _classService.UpdateClassAsync(id, classToBeUpdated);
+            Class updatedClass = await _classService.UpdateClassAsync(id, classToBeUpdated, userId);
             
             return Ok(updatedClass);
         }
 
         // DELETE api/<ClassController>/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<bool>> DeleteClass(int id)
+        public async Task<ActionResult<bool>> DeleteClass(int id, int userId)
         {
-            await _classService.DeleteClassAsync(id);
+            await _classService.DeleteClassAsync(id, userId);
 
             return NoContent();
         }
