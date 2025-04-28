@@ -15,9 +15,9 @@ namespace SchoolManagement.API.Controllers
 
         // GET: api/<AttendanceController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Attendance>>> GetAllAttendances()
+        public async Task<ActionResult<IEnumerable<Attendance>>> GetAllAttendances(int userId)
         {
-            IEnumerable<Attendance> attendances = await _attendanceService.GetAttendancesAsync();
+            IEnumerable<Attendance> attendances = await _attendanceService.GetAttendancesAsync(userId);
 
             if (attendances == null || !attendances.Any()) return NoContent();
 
@@ -26,36 +26,36 @@ namespace SchoolManagement.API.Controllers
 
         // GET api/<AttendanceController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Attendance>> GetAttendance(int id)
+        public async Task<ActionResult<Attendance>> GetAttendance(int id, int userId)
         {
-            Attendance attendance = await _attendanceService.GetAttendanceByIdAsync(id);
+            Attendance attendance = await _attendanceService.GetAttendanceByIdAsync(id, userId);
 
             return Ok(attendance);
         }
 
         // POST api/<AttendanceController>
         [HttpPost]
-        public async Task<ActionResult<Attendance>> PostAttendance(Attendance attendanceToBeCreated)
+        public async Task<ActionResult<Attendance>> PostAttendance(Attendance attendanceToBeCreated, int userId)
         {
-            Attendance createdAttendance = await _attendanceService.CreateAttendanceAsync(attendanceToBeCreated, attendanceToBeCreated?.StudentId, attendanceToBeCreated?.TeacherId);
+            Attendance createdAttendance = await _attendanceService.CreateAttendanceAsync(attendanceToBeCreated, attendanceToBeCreated?.StudentId, attendanceToBeCreated?.TeacherId, userId);
             
             return CreatedAtAction("GetAttendance", new { id = createdAttendance.Id }, createdAttendance);
         }
 
         // PUT api/<AttendanceController>/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<Attendance>> PutAttendance(int id, Attendance attendanceToBeUpdated)
+        public async Task<ActionResult<Attendance>> PutAttendance(int id, Attendance attendanceToBeUpdated, int userId)
         {
-            Attendance updatedAttendance = await _attendanceService.UpdateAttendanceAsync(id, attendanceToBeUpdated, attendanceToBeUpdated?.StudentId, attendanceToBeUpdated?.TeacherId);
+            Attendance updatedAttendance = await _attendanceService.UpdateAttendanceAsync(id, attendanceToBeUpdated, attendanceToBeUpdated?.StudentId, attendanceToBeUpdated?.TeacherId, userId);
             
             return Ok(updatedAttendance);
         }
 
         // DELETE api/<AttendanceController>/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<bool>> Delete(int id)
+        public async Task<ActionResult<bool>> Delete(int id, int userId)
         {
-            await _attendanceService.DeleteAttendanceAsync(id);
+            await _attendanceService.DeleteAttendanceAsync(id, userId);
 
             return NoContent();
         }
