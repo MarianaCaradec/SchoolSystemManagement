@@ -21,6 +21,7 @@ namespace SchoolManagement.API.Services
 
             return await _context.Grades
                 .Include(g => g.Student)
+                .Include(g => g.Subject)
                 .Select(g => new Grade
                 {
                     Id = g.Id,
