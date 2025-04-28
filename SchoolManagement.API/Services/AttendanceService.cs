@@ -101,22 +101,36 @@ namespace SchoolManagement.API.Services
         {
             string userRole = await _userService.GetUserRole(userId);
 
-            Attendance updatedAttendance;
-
             if (userRole == "Student")
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
-            } else if (userRole == "Teacher")
+            }
+
+            Attendance updatedAttendance;
+
+            if (userRole == "Teacher")
             {
-                updatedAttendance = await _context.Attendances
-                    .Include(a => a.Student)
-                    .FirstOrDefaultAsync(a => a.Id == id);
+                DateTime currentDate = DateTime.Now;
+                DateTime attendanceDate = attendanceToBeUpdated.Date.ToDateTime(TimeOnly.MinValue);
 
-                if (updatedAttendance == null) throw new KeyNotFoundException($"Attendance with ID {id} not found.");
 
-                updatedAttendance.Date = attendanceToBeUpdated.Date;
-                updatedAttendance.Present = attendanceToBeUpdated.Present;
-                updatedAttendance.StudentId = studentId;
+                if ((currentDate - attendanceDate).TotalDays < 21)
+                {
+                    updatedAttendance = await _context.Attendances
+                        .Include(a => a.Student)
+                        .Where(a => a.Student.Class.Teachers.Any(t => t.Id == userId))
+                        .FirstOrDefaultAsync(a => a.Id == id);
+
+                    if (updatedAttendance == null) throw new KeyNotFoundException($"Attendance with ID {id} not found.");
+
+                    updatedAttendance.Date = attendanceToBeUpdated.Date;
+                    updatedAttendance.Present = attendanceToBeUpdated.Present;
+                    updatedAttendance.StudentId = studentId;
+                } else
+                {
+                    throw new InvalidOperationException("Attendance update is not allowed after three weeks.");
+                }
+
             } else
             {
                 updatedAttendance = await _context.Attendances
