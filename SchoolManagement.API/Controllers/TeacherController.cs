@@ -14,9 +14,9 @@ namespace SchoolManagement.API.Controllers
 
         // GET: api/<ValuesController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Teacher>>> GetAllTeachers()
+        public async Task<ActionResult<IEnumerable<Teacher>>> GetAllTeachers(int userId)
         {
-            IEnumerable<Teacher> teachers = await _teacherService.GetTeachersAsync();
+            IEnumerable<Teacher> teachers = await _teacherService.GetTeachersAsync(userId);
 
             if (teachers == null || !teachers.Any()) return NoContent();
 
@@ -25,36 +25,36 @@ namespace SchoolManagement.API.Controllers
 
         // GET api/<ValuesController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Teacher>> GetTeacher(int id)
+        public async Task<ActionResult<Teacher>> GetTeacher(int id, int userId)
         {
-            Teacher teacher = await _teacherService.GetTeacherByIdAsync(id);
+            Teacher teacher = await _teacherService.GetTeacherByIdAsync(id, userId);
 
             return Ok(teacher);
         }
 
         // POST api/<ValuesController>
         [HttpPost]
-        public async Task<ActionResult<Teacher>> PostTeacher(Teacher teacherToBeCreated)
+        public async Task<ActionResult<Teacher>> PostTeacher(Teacher teacherToBeCreated, int userId)
         {
-            Teacher createdTeacher = await _teacherService.CreateTeacherAsync(teacherToBeCreated);
+            Teacher createdTeacher = await _teacherService.CreateTeacherAsync(teacherToBeCreated, userId);
 
             return CreatedAtAction("GetTeacher", new { id = createdTeacher.Id }, createdTeacher);
         }
 
         // PUT api/<ValuesController>/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<Teacher>> PutTeacher(int id, Teacher teacherToBeUpdated)
+        public async Task<ActionResult<Teacher>> PutTeacher(int id, Teacher teacherToBeUpdated, int userId)
         {
-            Teacher updatedTeacher = await _teacherService.UpdateTeacherAsync(id, teacherToBeUpdated);
+            Teacher updatedTeacher = await _teacherService.UpdateTeacherAsync(id, teacherToBeUpdated, userId);
 
             return Ok(updatedTeacher);
         }
 
         // DELETE api/<ValuesController>/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<bool>> DeleteTeacher(int id)
+        public async Task<ActionResult<bool>> DeleteTeacher(int id, int userId)
         {
-            await _teacherService.DeleteTeacherAsync(id); 
+            await _teacherService.DeleteTeacherAsync(id, userId); 
             
             return NoContent();
         }
