@@ -16,9 +16,9 @@ namespace SchoolManagement.API.Controllers
         [Authorize(Roles = "Admin")]
         // GET: api/<UserController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetAllUsers()
+        public async Task<ActionResult<IEnumerable<User>>> GetAllUsers(int userId)
         {
-            IEnumerable<User> users = await _userService.GetUsersAsync();
+            IEnumerable<User> users = await _userService.GetUsersAsync(userId);
 
             if (users == null || !users.Any()) return NoContent();
 
@@ -27,9 +27,9 @@ namespace SchoolManagement.API.Controllers
 
         // GET api/<UserController>/5
         [HttpGet("{email}")]
-        public async Task<ActionResult<User>> GetUser(string email)
+        public async Task<ActionResult<User>> GetUser(string email, int userId)
         {
-            User user = await _userService.GetUserByEmailAsync(email);
+            User user = await _userService.GetUserByEmailAsync(email, userId);
 
             if (user == null) return NotFound($"User with the email {email} not found.");
 
@@ -56,9 +56,9 @@ namespace SchoolManagement.API.Controllers
 
         // PUT api/<UserController>/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<User>> PutUser(int id, User userToBeUpdated)
+        public async Task<ActionResult<User>> PutUser(int id, User userToBeUpdated, int userId)
         {
-            User updatedUser = await _userService.UpdateUserAsync(id, userToBeUpdated);
+            User updatedUser = await _userService.UpdateUserAsync(id, userToBeUpdated, userId);
 
             return Ok(updatedUser);
         }
@@ -66,9 +66,9 @@ namespace SchoolManagement.API.Controllers
         [Authorize(Roles = "Admin")]
         // DELETE api/<UserController>/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int id)
+        public async Task<ActionResult> Delete(int id, int useId)
         {
-            await _userService.DeleteUserAsync(id);
+            await _userService.DeleteUserAsync(id, useId);
 
             return NoContent();
         }
