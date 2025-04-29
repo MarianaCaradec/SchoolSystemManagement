@@ -117,7 +117,6 @@ namespace SchoolManagement.API.Services
                 DateTime currentDate = DateTime.Now;
                 DateTime attendanceDate = attendance.Date.ToDateTime(TimeOnly.MinValue);
 
-
                 if ((currentDate - attendanceDate).TotalDays >= 21)
                 {
                     throw new InvalidOperationException("Attendance update is not allowed after three weeks.");
