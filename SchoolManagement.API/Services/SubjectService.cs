@@ -14,77 +14,47 @@ namespace SchoolManagement.API.Services
         {
             string userRole = await _userService.GetUserRole(userId);
 
-            IEnumerable<Subject> subjects;
+            IQueryable<Subject> query = _context.Subjects.Include(sub => sub.Teachers);
 
             if(userRole == "Teacher")
             {
-                subjects = await _context.Subjects
-                .Include(sub => sub.Teachers)
-                .Where(sub => sub.Teachers.Any(t => t.Id == userId))
-                .Select(sub => new Subject
-                {
-                    Id = sub.Id,
-                    Title = sub.Title,
-                    Teachers = sub.Teachers.ToList()
-                }).ToListAsync();
-            } else if(userRole == "Student")
+                query = query.Where(sub => sub.Teachers.Any(t => t.Id == userId));
+            }
+            
+            if(userRole == "Student")
             {
-                subjects = await _context.Subjects
-                .Include(sub => sub.Teachers)
-                .Include(sub => sub.Grades)
-                .Where(sub => sub.Grades.Any(g => g.StudentId == userId))
-                .Select(sub => new Subject
-                {
-                    Id = sub.Id,
-                    Title = sub.Title,
-                    Teachers = sub.Teachers.ToList(),
-                    Grades = sub.Grades.ToList()
-                }).ToListAsync();
-            } else
-            {
-                subjects = await _context.Subjects
-                 .Include(sub => sub.Teachers)
-                 .Include(sub => sub.Grades)
-                  .Select(sub => new Subject
-                  {
-                     Id = sub.Id,
-                     Title = sub.Title,
-                     Teachers = sub.Teachers.ToList(),
-                     Grades = sub.Grades.ToList()
-                  }).ToListAsync();
+                query = query.Include(sub => sub.Grades)
+                .Where(sub => sub.Grades.Any(g => g.StudentId == userId));
             }
 
-            return subjects;
+            return await query.Select(sub => new Subject
+            {
+                Id = sub.Id,
+                Title = sub.Title,
+                Teachers = sub.Teachers.ToList(),
+                Grades = sub.Grades.ToList(),
+            }).ToListAsync(); ;
         }
 
         public async Task<Subject> GetSubjectByIdAsync(int id, int userId)
         {
             string userRole = await _userService.GetUserRole(userId);
 
-            Subject subject;
+            IQueryable<Subject> query = _context.Subjects
+                .Include(sub => sub.Teachers)
+                .Include(sub => sub.Grades);
 
             if (userRole == "Teacher")
             {
-                subject = await _context.Subjects
-                 .Include(sub => sub.Teachers)
-                 .Where(sub => sub.Teachers.Any(t => t.Id == userId))
-                 .FirstOrDefaultAsync(sub => sub.Id == id);
+                query = query.Where(sub => sub.Teachers.Any(t => t.Id == userId));
             }
-            else if (userRole == "Student")
+            
+            if (userRole == "Student")
             {
-                subject = await _context.Subjects
-                 .Include(sub => sub.Teachers)
-                 .Include(sub => sub.Grades)
-                 .Where(sub => sub.Grades.Any(g => g.StudentId == userId))
-                 .FirstOrDefaultAsync(sub => sub.Id == id);
+                query = query.Where(sub => sub.Grades.Any(g => g.StudentId == userId));
             }
-            else
-            {
-                subject = await _context.Subjects
-                .Include(sub => sub.Teachers)
-                .Include(sub => sub.Grades)
-                .FirstOrDefaultAsync(sub => sub.Id == id);
-            }
+
+            Subject subject = await query.FirstOrDefaultAsync(sub => sub.Id == id);
 
             if (subject == null) throw new KeyNotFoundException($"Subject with ID {id} not found.");
             
@@ -95,7 +65,7 @@ namespace SchoolManagement.API.Services
         {
             string userRole = await _userService.GetUserRole(userId);
 
-            if (userRole == "Student" || userRole == "Teacher")
+            if (userRole != "Admin")
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
@@ -123,33 +93,33 @@ namespace SchoolManagement.API.Services
         {
             string userRole = await _userService.GetUserRole(userId);
 
-            if (userRole == "Student" || userRole == "Teacher")
+            if (userRole != "Admin")
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
 
-            Subject updatedSubject = await _context.Subjects
+            Subject subject = await _context.Subjects
                 .Include(sub => sub.Teachers)
                 .Include(sub => sub.Grades)
                 .FirstOrDefaultAsync(sub => sub.Id == id);
 
-            if (updatedSubject == null) throw new KeyNotFoundException($"Subject with ID {id} not found.");
+            if (subject == null) throw new KeyNotFoundException($"Subject with ID {id} not found.");
             
-            updatedSubject.Title = subjectToBeUpdated.Title;
-            updatedSubject.Teachers = subjectToBeUpdated.Teachers;
-            updatedSubject.Grades = subjectToBeUpdated.Grades;
+            subject.Title = subjectToBeUpdated.Title;
+            subject.Teachers = subjectToBeUpdated.Teachers;
+            subject.Grades = subjectToBeUpdated.Grades;
             
-            _context.Subjects.Update(updatedSubject);
+            _context.Subjects.Update(subject);
             await _context.SaveChangesAsync();
 
-            return updatedSubject;
+            return subject;
         }
 
         public async Task<bool> DeleteSubjectAsync(int id, int userId)
         {
             string userRole = await _userService.GetUserRole(userId);
 
-            if (userRole == "Student" || userRole == "Teacher")
+            if (userRole != "Admin")
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
