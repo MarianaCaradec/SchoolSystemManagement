@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
+using System.Security.Cryptography.Pkcs;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -14,9 +15,9 @@ namespace SchoolManagement.API.Controllers
 
         // GET: api/<GradeController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Grade>>> GetAllGrades()
+        public async Task<ActionResult<IEnumerable<Grade>>> GetAllGrades(int userId)
         {
-            IEnumerable<Grade> grades = await _gradeService.GetGradesAsync();
+            IEnumerable<Grade> grades = await _gradeService.GetGradesAsync(userId);
 
             if (grades == null || !grades.Any()) return NoContent();
 
@@ -25,36 +26,38 @@ namespace SchoolManagement.API.Controllers
 
         // GET api/<GradeController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Grade>> GetGrade(int id)
+        public async Task<ActionResult<Grade>> GetGrade(int id, int userId)
         {
-            Grade grade = await _gradeService.GetGradeByIdAsync(id);
+            Grade grade = await _gradeService.GetGradeByIdAsync(id, userId);
 
             return Ok(grade);
         }
 
         // POST api/<GradeController>
         [HttpPost]
-        public async Task<ActionResult<Grade>> PostGrade(Grade gradeToBeCreated)
+        public async Task<ActionResult<Grade>> PostGrade(Grade gradeToBeCreated, int userId)
         {
-            Grade createdGrade = await _gradeService.CreateGradeAsync(gradeToBeCreated);
+            Grade createdGrade = await _gradeService.CreateGradeAsync(gradeToBeCreated, userId);
 
             return CreatedAtAction("GetGrade", new { id = createdGrade.Id }, createdGrade);
         }
 
         // PUT api/<GradeController>/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<Grade>> PutGrade(int id, Grade gradeToBeUpdated)
+        public async Task<ActionResult<Grade>> PutGrade(int id, Grade gradeToBeUpdated, int studentId, int subjectId, int userId)
         {
-            Grade updatedGrade = await _gradeService.UpdateGradeAsync(id, gradeToBeUpdated, gradeToBeUpdated.StudentId, gradeToBeUpdated.SubjectId);
+
+            var updatedGrade = await _gradeService.UpdateGradeAsync(id, gradeToBeUpdated, studentId, subjectId, userId);
 
             return Ok(updatedGrade);
+
         }
 
         // DELETE api/<GradeController>/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<bool>> DeleteGrade(int id)
+        public async Task<ActionResult<bool>> DeleteGrade(int id, int userId)
         {
-            await _gradeService.DeleteGradeAsync(id);
+            await _gradeService.DeleteGradeAsync(id, userId);
 
             return NoContent();
         }

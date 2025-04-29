@@ -5,15 +5,34 @@ using SchoolManagement.API.Models;
 
 namespace SchoolManagement.API.Services
 {
-    public class SubjectService(SchoolSysDBContext context) : ISubjectService
+    public class SubjectService(SchoolSysDBContext context, IUserService userService) : ISubjectService
     {
         private readonly SchoolSysDBContext _context = context;
+        private readonly IUserService _userService = userService;
 
-        public async Task<IEnumerable<Subject>> GetSubjectsAsync()
+        public async Task<IEnumerable<Subject>> GetSubjectsAsync(int userId)
         {
-            return await _context.Subjects
+            string userRole = await _userService.GetUserRole(userId);
+
+            IEnumerable<Subject> subjects;
+
+            if(userRole == "Teacher")
+            {
+                subjects = await _context.Subjects
+                .Include(sub => sub.Teachers)
+                .Where(sub => sub.Teachers.Any(t => t.Id == userId))
+                .Select(sub => new Subject
+                {
+                    Id = sub.Id,
+                    Title = sub.Title,
+                    Teachers = sub.Teachers.ToList()
+                }).ToListAsync();
+            } else if(userRole == "Student")
+            {
+                subjects = await _context.Subjects
                 .Include(sub => sub.Teachers)
                 .Include(sub => sub.Grades)
+                .Where(sub => sub.Grades.Any(g => g.StudentId == userId))
                 .Select(sub => new Subject
                 {
                     Id = sub.Id,
@@ -21,27 +40,71 @@ namespace SchoolManagement.API.Services
                     Teachers = sub.Teachers.ToList(),
                     Grades = sub.Grades.ToList()
                 }).ToListAsync();
+            } else
+            {
+                subjects = await _context.Subjects
+                 .Include(sub => sub.Teachers)
+                 .Include(sub => sub.Grades)
+                  .Select(sub => new Subject
+                  {
+                     Id = sub.Id,
+                     Title = sub.Title,
+                     Teachers = sub.Teachers.ToList(),
+                     Grades = sub.Grades.ToList()
+                  }).ToListAsync();
+            }
+
+            return subjects;
         }
 
-        public async Task<Subject> GetSubjectByIdAsync(int id)
+        public async Task<Subject> GetSubjectByIdAsync(int id, int userId)
         {
-            Subject subjectById = await _context.Subjects
+            string userRole = await _userService.GetUserRole(userId);
+
+            Subject subject;
+
+            if (userRole == "Teacher")
+            {
+                subject = await _context.Subjects
+                 .Include(sub => sub.Teachers)
+                 .Where(sub => sub.Teachers.Any(t => t.Id == userId))
+                 .FirstOrDefaultAsync(sub => sub.Id == id);
+            }
+            else if (userRole == "Student")
+            {
+                subject = await _context.Subjects
+                 .Include(sub => sub.Teachers)
+                 .Include(sub => sub.Grades)
+                 .Where(sub => sub.Grades.Any(g => g.StudentId == userId))
+                 .FirstOrDefaultAsync(sub => sub.Id == id);
+            }
+            else
+            {
+                subject = await _context.Subjects
                 .Include(sub => sub.Teachers)
                 .Include(sub => sub.Grades)
                 .FirstOrDefaultAsync(sub => sub.Id == id);
+            }
 
-            if (subjectById == null) throw new KeyNotFoundException($"Subject with ID {id} not found.");
+            if (subject == null) throw new KeyNotFoundException($"Subject with ID {id} not found.");
             
-            return subjectById;
+            return subject;
         }
 
-        public async Task<Subject> CreateSubjectAsync(Subject subjectToBeCreated)
+        public async Task<Subject> CreateSubjectAsync(Subject subjectToBeCreated, int userId)
         {
+            string userRole = await _userService.GetUserRole(userId);
+
+            if (userRole == "Student" || userRole == "Teacher")
+            {
+                throw new UnauthorizedAccessException("You are not authorized to do this action.");
+            }
+
             Subject createdSubject = new Subject
             {
                 Title = subjectToBeCreated.Title,
                 Teachers = subjectToBeCreated.Teachers,
-                Grades = subjectToBeCreated.Grades
+                Grades = subjectToBeCreated?.Grades
             };
 
             if (createdSubject.Id == null || createdSubject.Id == 0)
@@ -56,8 +119,15 @@ namespace SchoolManagement.API.Services
             return createdSubject;
         }
 
-        public async Task<Subject> UpdateSubjectAsync(int id, Subject subjectToBeUpdated)
+        public async Task<Subject> UpdateSubjectAsync(int id, Subject subjectToBeUpdated, int userId)
         {
+            string userRole = await _userService.GetUserRole(userId);
+
+            if (userRole == "Student" || userRole == "Teacher")
+            {
+                throw new UnauthorizedAccessException("You are not authorized to do this action.");
+            }
+
             Subject updatedSubject = await _context.Subjects
                 .Include(sub => sub.Teachers)
                 .Include(sub => sub.Grades)
@@ -75,8 +145,15 @@ namespace SchoolManagement.API.Services
             return updatedSubject;
         }
 
-        public async Task<bool> DeleteSubjectAsync(int id)
+        public async Task<bool> DeleteSubjectAsync(int id, int userId)
         {
+            string userRole = await _userService.GetUserRole(userId);
+
+            if (userRole == "Student" || userRole == "Teacher")
+            {
+                throw new UnauthorizedAccessException("You are not authorized to do this action.");
+            }
+
             Subject subjectToBeDeleted = await _context.Subjects.FindAsync(id);
 
             if (subjectToBeDeleted == null) throw new KeyNotFoundException($"Subject with ID {id} not found.");

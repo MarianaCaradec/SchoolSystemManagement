@@ -4,10 +4,10 @@ namespace SchoolManagement.API.Interfaces
 {
     public interface IAttendanceService
     {
-        Task<IEnumerable<Attendance>> GetAttendancesAsync();
-        Task<Attendance> GetAttendanceByIdAsync(int id);
-        Task<Attendance> CreateAttendanceAsync(Attendance attendanceToBeCreated, int? studentId, int? teacherId);
-        Task<Attendance> UpdateAttendanceAsync(int id, Attendance attendanceToBeUpdated, int? studentId, int? teacherId);
-        Task<bool> DeleteAttendanceAsync(int id);
+        Task<IEnumerable<Attendance>> GetAttendancesAsync(int userId);
+        Task<Attendance> GetAttendanceByIdAsync(int id, int userId);
+        Task<Attendance> CreateAttendanceAsync(Attendance attendanceToBeCreated, int? studentId, int? teacherId, int userId);
+        Task<Attendance> UpdateAttendanceAsync(int id, Attendance attendanceToBeUpdated, int? studentId, int? teacherId, int userId);
+        Task<bool> DeleteAttendanceAsync(int id, int userId);
     }
 }

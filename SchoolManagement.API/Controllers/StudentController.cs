@@ -14,9 +14,9 @@ namespace SchoolManagement.API.Controllers
 
         // GET: api/<StudentController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Student>>> GetAllStudents()
+        public async Task<ActionResult<IEnumerable<Student>>> GetAllStudents(int userId)
         {
-            IEnumerable<Student> students = await _studentService.GetStudentsAsync();
+            IEnumerable<Student> students = await _studentService.GetStudentsAsync(userId);
 
             if (students == null || !students.Any()) return NoContent();
 
@@ -25,36 +25,36 @@ namespace SchoolManagement.API.Controllers
 
         // GET api/<StudentController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Student>> GetStudent(int id)
+        public async Task<ActionResult<Student>> GetStudent(int id, int userId)
         {
-            Student student = await _studentService.GetStudentByIdAsync(id);
+            Student student = await _studentService.GetStudentByIdAsync(id, userId);
 
             return Ok(student);
         }
 
         // POST api/<StudentController>
         [HttpPost]
-        public async Task<ActionResult<Student>> PostStudent(Student studentToBeCreated)
+        public async Task<ActionResult<Student>> PostStudent(Student studentToBeCreated, int userId)
         {
-            Student createdStudent = await _studentService.CreateStudentAsync(studentToBeCreated);
+            Student createdStudent = await _studentService.CreateStudentAsync(studentToBeCreated, userId);
 
             return CreatedAtAction("GetStudent", new { id = createdStudent.Id }, createdStudent);
         }
 
         // PUT api/<StudentController>/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<Student>> PutStudent(int id, Student studentToBeUpdated)
+        public async Task<ActionResult<Student>> PutStudent(int id, Student studentToBeUpdated, int userId)
         {
-            Student updatedStudent = await _studentService.UpdateStudentAsync(id, studentToBeUpdated);
+            Student updatedStudent = await _studentService.UpdateStudentAsync(id, studentToBeUpdated, userId);
 
             return Ok(updatedStudent);
         }
 
         // DELETE api/<StudentController>/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<bool>> DeleteStudent(int id)
+        public async Task<ActionResult<bool>> DeleteStudent(int id, int userId)
         {
-            await _studentService.DeleteStudentAsync(id);
+            await _studentService.DeleteStudentAsync(id, userId);
             
             return NoContent();
         }

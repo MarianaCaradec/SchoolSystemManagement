@@ -10,9 +10,20 @@ namespace SchoolManagement.API.Services
         private readonly SchoolSysDBContext _context = context;
         private readonly IUserService _userService = userService;
 
-        public async Task<IEnumerable<Teacher>> GetTeachersAsync()
+        public async Task<IEnumerable<Teacher>> GetTeachersAsync(int userId)
         {
-            return await _context.Teachers
+            string userRole = await _userService.GetUserRole(userId);
+
+            if (userRole == "Student")
+            {
+                throw new UnauthorizedAccessException("You are not authorized to do this action.");
+            }
+
+            IEnumerable<Teacher> teachers;
+
+            if(userRole == "Teacher")
+            {
+                teachers = await _context.Teachers
                 .Include(t => t.User)
                 .Include(t => t.Subjects)
                 .Include(t => t.Classes)
@@ -27,25 +38,86 @@ namespace SchoolManagement.API.Services
                     User = t.User,
                     Subjects = t.Subjects.ToList(),
                     Classes = t.Classes.ToList(),
+                }).ToListAsync();
+            } else
+            {
+                teachers = await _context.Teachers
+                .Include(t => t.User)
+                .Include(t => t.Subjects)
+                .Include(t => t.Classes)
+                .Include(t => t.Attendances)
+                .Select(t => new Teacher
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    Surname = t.Surname,
+                    BirthDate = t.BirthDate,
+                    Address = t.Address,
+                    MobileNumber = t.MobileNumber,
+                    User = t.User,
+                    Subjects = t.Subjects.ToList(),
+                    Classes = t.Classes.ToList(),
                     Attendances = t.Attendances.ToList()
                 }).ToListAsync();
+            }
+
+            return teachers;
         }
 
-        public async Task<Teacher> GetTeacherByIdAsync(int id)
+        public async Task<Teacher> GetTeacherByIdAsync(int id, int userId)
         {
-            Teacher teacher = await _context.Teachers
+            string userRole = await _userService.GetUserRole(userId);
+
+            if (userRole == "Student")
+            {
+                throw new UnauthorizedAccessException("You are not authorized to do this action.");
+            }
+
+            Teacher teacher;
+
+            if (userRole == "Teacher")
+            {
+                teacher = await _context.Teachers
                 .Include(t => t.User)
                 .Include(t => t.Subjects)
                 .Include(t => t.Classes)
                 .FirstOrDefaultAsync(t => t.Id == id);
+
+                bool isTeacherData = teacher.Id == userId;
+
+                if (isTeacherData)
+                {
+                    teacher = await _context.Teachers
+                    .Include(t => t.User)
+                    .Include(t => t.Subjects)
+                    .Include(t => t.Classes)
+                    .Include(t => t.Attendances)
+                    .FirstOrDefaultAsync(t => t.Id == id);
+                }
+            } else
+            {
+                teacher = await _context.Teachers
+                .Include(t => t.User)
+                .Include(t => t.Subjects)
+                .Include(t => t.Classes)
+                .Include (t => t.Attendances)
+                .FirstOrDefaultAsync(t => t.Id == id);
+            }
 
             if (teacher == null) throw new KeyNotFoundException($"Teacher with ID {id} not found.");
 
             return teacher;
         }
 
-        public async Task<Teacher> CreateTeacherAsync(Teacher teacherToBeCreated)
+        public async Task<Teacher> CreateTeacherAsync(Teacher teacherToBeCreated, int userId)
         {
+            string userRole = await _userService.GetUserRole(userId);
+
+            if (userRole == "Student" || userRole == "Teacher")
+            {
+                throw new UnauthorizedAccessException("You are not authorized to do this action.");
+            }
+
             Teacher createdTeacher = new Teacher
             {
                 Name = teacherToBeCreated.Name,
@@ -68,8 +140,15 @@ namespace SchoolManagement.API.Services
             return createdTeacher;
         }
 
-        public async Task<Teacher> UpdateTeacherAsync(int id, Teacher teacherToBeUpdated)
+        public async Task<Teacher> UpdateTeacherAsync(int id, Teacher teacherToBeUpdated, int userId)
         {
+            string userRole = await _userService.GetUserRole(userId);
+
+            if (userRole == "Student")
+            {
+                throw new UnauthorizedAccessException("You are not authorized to do this action.");
+            }
+
             Teacher updatedTeacher = await _context.Teachers
                 .Include(t => t.User)
                 .Include(t => t.Subjects)
@@ -79,9 +158,13 @@ namespace SchoolManagement.API.Services
 
             if (updatedTeacher == null) throw new KeyNotFoundException($"Teacher with ID {id} not found.");
 
-            await _userService.UpdateUserAsync(updatedTeacher.UserId, teacherToBeUpdated.User);
-
-            if(teacherToBeUpdated.User?.Role == "Admin")
+            if (userRole == "Teacher")
+            {
+                updatedTeacher.Name = teacherToBeUpdated.Name;
+                updatedTeacher.Surname = teacherToBeUpdated.Surname;
+                updatedTeacher.BirthDate = teacherToBeUpdated.BirthDate;
+                updatedTeacher.MobileNumber = teacherToBeUpdated.MobileNumber;
+            } else
             {
                 updatedTeacher.Name = teacherToBeUpdated.Name;
                 updatedTeacher.Surname = teacherToBeUpdated.Surname;
@@ -90,12 +173,6 @@ namespace SchoolManagement.API.Services
                 updatedTeacher.Subjects = teacherToBeUpdated.Subjects ?? updatedTeacher.Subjects;
                 updatedTeacher.Classes = teacherToBeUpdated.Classes ?? updatedTeacher.Classes;
                 updatedTeacher.Attendances = teacherToBeUpdated.Attendances ?? updatedTeacher.Attendances;
-            } else if (teacherToBeUpdated.User?.Role == "Teacher")
-            {
-                updatedTeacher.Name = teacherToBeUpdated.Name;
-                updatedTeacher.Surname = teacherToBeUpdated.Surname;
-                updatedTeacher.BirthDate = teacherToBeUpdated.BirthDate;
-                updatedTeacher.MobileNumber = teacherToBeUpdated.MobileNumber;
             }
 
             _context.Update(updatedTeacher);
@@ -104,8 +181,15 @@ namespace SchoolManagement.API.Services
             return updatedTeacher;
         }
 
-    public async Task<bool> DeleteTeacherAsync(int id)
+    public async Task<bool> DeleteTeacherAsync(int id, int userId)
         {
+            string userRole = await _userService.GetUserRole(userId);
+
+            if (userRole == "Student" || userRole == "Teacher")
+            {
+                throw new UnauthorizedAccessException("You are not authorized to do this action.");
+            }
+
             var teacherToBeDeleted = await _context.Teachers.FindAsync(id);
 
             if (teacherToBeDeleted == null) throw new KeyNotFoundException($"Teacher with ID {id} not found.");

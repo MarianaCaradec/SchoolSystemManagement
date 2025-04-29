@@ -1,43 +1,82 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration.UserSecrets;
 using SchoolManagement.API.Data.Context;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
 
 namespace SchoolManagement.API.Services
 {
-    public class AttendanceService(SchoolSysDBContext context) : IAttendanceService
+    public class AttendanceService(SchoolSysDBContext context, IUserService userService) : IAttendanceService
     {
         private readonly SchoolSysDBContext _context = context;
+        private readonly IUserService _userService = userService;
 
-        public async Task<IEnumerable<Attendance>> GetAttendancesAsync()
+        public async Task<IEnumerable<Attendance>> GetAttendancesAsync(int userId)
         {
-            return await _context.Attendances
-                .Include(a => a.Student)
-                .Include(a => a.Teacher)
-                .Select(a => new Attendance
-                {
-                    Id = a.Id,
-                    Date = a.Date,
-                    Present = a.Present,
-                    Student = a.Student,
-                    Teacher = a.Teacher
-                }).ToListAsync();
+            string userRole = await _userService.GetUserRole(userId);
+
+            if(userRole == "Student")
+            {
+                return await _context.Attendances
+                    .Include(a => a.Student)
+                    .Where(a => a.Student.Id == userId)
+                    .Select(a => new Attendance
+                    {
+                       Id = a.Id,
+                       Date = a.Date,
+                       Present = a.Present,
+                       Student = a.Student,
+                    }).ToListAsync();
+            } else
+            {
+                return await _context.Attendances
+                    .Include(a => a.Student)
+                    .Include(a => a.Teacher)
+                    .Select(a => new Attendance
+                    {
+                        Id = a.Id,
+                        Date = a.Date,
+                        Present = a.Present,
+                        Student = a.Student,
+                        Teacher = a.Teacher
+                    }).ToListAsync();
+            }   
         }
 
-        public async Task<Attendance> GetAttendanceByIdAsync(int id)
+        public async Task<Attendance> GetAttendanceByIdAsync(int id, int userId)
         {
-            Attendance attendance = await _context.Attendances
-                .Include(a => a.Student)
-                .Include(a => a.Teacher)
-                .FirstOrDefaultAsync(a => a.Id == id);
+            string userRole = await _userService.GetUserRole(userId);
+
+            Attendance attendance;
+
+            if (userRole == "Student")
+            {
+                attendance = await _context.Attendances
+                    .Include(a => a.Student)
+                    .Where(a => a.Student.Id == userId)
+                    .FirstOrDefaultAsync(a => a.Id == id);
+            } else
+            {
+                attendance = await _context.Attendances
+                    .Include(a => a.Student)
+                    .Include(a => a.Teacher)
+                    .FirstOrDefaultAsync(a => a.Id == id);
+            } 
 
             if (attendance == null) throw new KeyNotFoundException($"Attendance with ID {id} not found.");
 
             return attendance;
         }
 
-        public async Task<Attendance> CreateAttendanceAsync(Attendance attendanceToBeCreated, int? studentId, int? teacherId)
+        public async Task<Attendance> CreateAttendanceAsync(Attendance attendanceToBeCreated, int? studentId, int? teacherId, int userId)
         {
+            string userRole = await _userService.GetUserRole(userId);
+
+            if(userRole == "Student")
+            {
+                throw new UnauthorizedAccessException("You are not authorized to do this action.");
+            }
+
             Attendance createdAttendance = new Attendance
             {
                 Date = attendanceToBeCreated.Date,
@@ -58,19 +97,54 @@ namespace SchoolManagement.API.Services
             return createdAttendance;
         }
 
-        public async Task<Attendance> UpdateAttendanceAsync(int id, Attendance attendanceToBeUpdated, int? studentId, int? teacherId)
+        public async Task<Attendance> UpdateAttendanceAsync(int id, Attendance attendanceToBeUpdated, int? studentId, int? teacherId, int userId)
         {
-            Attendance updatedAttendance = await _context.Attendances
-                .Include(a => a.Student)
-                .Include(a => a.Teacher)
-                .FirstOrDefaultAsync(a => a.Id == id);
+            string userRole = await _userService.GetUserRole(userId);
 
-            if (updatedAttendance == null) throw new KeyNotFoundException($"Attendance with ID {id} not found.");
-            
-            updatedAttendance.Date = attendanceToBeUpdated.Date;
-            updatedAttendance.Present = attendanceToBeUpdated.Present;
-            updatedAttendance.StudentId = studentId;
-            updatedAttendance.TeacherId = teacherId;
+            if (userRole == "Student")
+            {
+                throw new UnauthorizedAccessException("You are not authorized to do this action.");
+            }
+
+            Attendance updatedAttendance;
+
+            if (userRole == "Teacher")
+            {
+                DateTime currentDate = DateTime.Now;
+                DateTime attendanceDate = attendanceToBeUpdated.Date.ToDateTime(TimeOnly.MinValue);
+
+
+                if ((currentDate - attendanceDate).TotalDays < 21)
+                {
+                    updatedAttendance = await _context.Attendances
+                        .Include(a => a.Student)
+                        .Where(a => a.Student.Class.Teachers.Any(t => t.Id == userId))
+                        .FirstOrDefaultAsync(a => a.Id == id);
+
+                    if (updatedAttendance == null) throw new KeyNotFoundException($"Attendance with ID {id} not found.");
+
+                    updatedAttendance.Date = attendanceToBeUpdated.Date;
+                    updatedAttendance.Present = attendanceToBeUpdated.Present;
+                    updatedAttendance.StudentId = studentId;
+                } else
+                {
+                    throw new InvalidOperationException("Attendance update is not allowed after three weeks.");
+                }
+
+            } else
+            {
+                updatedAttendance = await _context.Attendances
+                   .Include(a => a.Student)
+                   .Include(a => a.Teacher)
+                   .FirstOrDefaultAsync(a => a.Id == id);
+
+                if (updatedAttendance == null) throw new KeyNotFoundException($"Attendance with ID {id} not found.");
+
+                updatedAttendance.Date = attendanceToBeUpdated.Date;
+                updatedAttendance.Present = attendanceToBeUpdated.Present;
+                updatedAttendance.StudentId = studentId;
+                updatedAttendance.TeacherId = teacherId;
+            }
 
             _context.Attendances.Update(updatedAttendance);
             await _context.SaveChangesAsync();
@@ -78,8 +152,15 @@ namespace SchoolManagement.API.Services
             return updatedAttendance;
         }
 
-        public async Task<bool> DeleteAttendanceAsync(int id)
+        public async Task<bool> DeleteAttendanceAsync(int id, int userId)
         {
+            string userRole = await _userService.GetUserRole(userId);
+
+            if(userRole == "Teacher" || userRole == "Student")
+            {
+                throw new UnauthorizedAccessException("You are not authorized to do this action.");
+            }
+
             Attendance attendanceToBeDeleted = await _context.Attendances.FindAsync(id);
 
             if (attendanceToBeDeleted == null) throw new KeyNotFoundException($"Attendance with ID {id} not found.");
