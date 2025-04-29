@@ -102,41 +102,41 @@ namespace SchoolManagement.API.Services
 
             IQueryable<Attendance> query = _context.Attendances.Include(a => a.Student);
 
-            Attendance updatedAttendance = query.FirstOrDefault(a => a.Id == id);
+            Attendance attendance = query.FirstOrDefault(a => a.Id == id);
 
-            if (updatedAttendance == null) throw new KeyNotFoundException($"Attendance with ID {id} not found.");
+            if (attendance == null) throw new KeyNotFoundException($"Attendance with ID {id} not found.");
 
             if (userRole == "Teacher")
             {
+                if (!attendance.Student.Class.Teachers.Any(t => t.Id == userId))
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to do this action.");
+
+                }
+
                 DateTime currentDate = DateTime.Now;
-                DateTime attendanceDate = attendanceToBeUpdated.Date.ToDateTime(TimeOnly.MinValue);
+                DateTime attendanceDate = attendance.Date.ToDateTime(TimeOnly.MinValue);
 
 
                 if ((currentDate - attendanceDate).TotalDays >= 21)
                 {
                     throw new InvalidOperationException("Attendance update is not allowed after three weeks.");
                 }
-
-                if(!updatedAttendance.Student.Class.Teachers.Any(t => t.Id == userId))
-                {
-                    throw new UnauthorizedAccessException("You are not authorized to do this action.");
-
-                }
             } 
 
             if(userRole == "Admin")
             {
-                updatedAttendance.TeacherId = teacherId;
+                attendance.TeacherId = teacherId;
             }
 
-            updatedAttendance.Date = attendanceToBeUpdated.Date;
-            updatedAttendance.Present = attendanceToBeUpdated.Present;
-            updatedAttendance.StudentId = studentId;
+            attendance.Date = attendanceToBeUpdated.Date;
+            attendance.Present = attendanceToBeUpdated.Present;
+            attendance.StudentId = studentId;
 
-            _context.Attendances.Update(updatedAttendance);
+            _context.Attendances.Update(attendance);
             await _context.SaveChangesAsync();
 
-            return updatedAttendance;
+            return attendance;
         }
 
         public async Task<bool> DeleteAttendanceAsync(int id, int userId)
