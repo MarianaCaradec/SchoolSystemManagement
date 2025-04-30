@@ -13,65 +13,45 @@ namespace SchoolManagement.API.Services
         {
             string userRole = await GetUserRole(userId);
 
-            IEnumerable<User> users;
+            IQueryable<User> query = _context.Users.Include(u => u.Email).Include(u => u.Role);
 
-            if (userRole == "Student" || userRole == "Teacher")
+            if(userRole == "Admin")
             {
-                users = await _context.Users
-                    .Include(u => u.Email)
-                    .Include(u => u.Role)
-                    .Select(u => new User
-                    {
-                        Email = u.Email,
-                        Role = u.Role
-                    }).ToListAsync();
-            }
-            else
-            {
-                users = await _context.Users
-                    .Include(u => u.Email)
+                query = query
                     .Include(u => u.Password)
-                    .Include(u => u.Role)
                     .Include(u => u.Teacher)
-                    .Include(u => u.Student)
-                    .Select(u => new User
-                    {
-                        Email = u.Email,
-                        Password = u.Password,
-                        Role = u.Role,
-                        Teacher = u.Teacher,
-                        Student = u.Student
-                    }).ToListAsync();
+                    .Include(u => u.Student);
             }
 
-            return users;
+            return await query.Select(u => new User
+            {
+                Email = u.Email,
+                Password = userRole == "Admin" ? u.Password : null,
+                Role = u.Role,
+                Teacher = userRole == "Admin" ? u.Teacher : null,
+                Student = userRole == "Admin" ? u.Student : null,
+            }).ToListAsync(); ;
         }
 
         public async Task<User> GetUserByEmailAsync(string email, int userId)
         {
             string userRole = await GetUserRole(userId);
 
-            User userByEmail;
+            IQueryable<User> query = _context.Users.Include(u => u.Email).Include(u => u.Role);
 
-            if (userRole == "Student" || userRole == "Teacher")
+            if(userRole == "Admin")
             {
-                userByEmail = await _context.Users
-                    .Include(u => u.Email)
-                    .Include(u => u.Role)
-                    .FirstOrDefaultAsync(u => u.Email == email);
-            }
-            else
-            {
-                userByEmail = await _context.Users
-                    .Include(u => u.Email)
+                query = query
                     .Include(u => u.Password)
-                    .Include(u => u.Role)
                     .Include(u => u.Teacher)
-                    .Include(u => u.Student)
-                    .FirstOrDefaultAsync(u => u.Email == email);
+                    .Include(u => u.Student);
             }
 
-            return userByEmail;
+            User user = await query.FirstOrDefaultAsync(u => u.Email == email);
+
+            if (user == null) throw new KeyNotFoundException($"User with email {email} not found.");
+
+            return user;
         }
 
         public async Task<string> GetUserRole(int id)
@@ -111,7 +91,7 @@ namespace SchoolManagement.API.Services
         {
             string userRole = await GetUserRole(userId);
 
-            User updatedUser = await _context.Users
+            User user = await _context.Users
                 .Include(u => u.Email)
                 .Include(u => u.Password)
                 .Include(u => u.Role)
@@ -119,31 +99,31 @@ namespace SchoolManagement.API.Services
                 .Include(u => u.Student)
                 .FirstOrDefaultAsync(u => u.Id == id);
 
-            if (updatedUser == null) throw new KeyNotFoundException($"User with ID {id} not found");
+            if (user == null) throw new KeyNotFoundException($"User with ID {id} not found");
 
-            if (userRole == "Teacher")
+            if (userRole != "Admin")
             {
-                updatedUser.Email = userToBeUpdated.Email;
-                updatedUser.Password = userToBeUpdated.Password;
+                user.Email = userToBeUpdated.Email;
+                user.Password = userToBeUpdated.Password;
             }
             else
             {
-                updatedUser.Email = userToBeUpdated.Email;
-                updatedUser.Password = userToBeUpdated.Password;
-                updatedUser.Role = userToBeUpdated.Role;
+                user.Email = userToBeUpdated.Email;
+                user.Password = userToBeUpdated.Password;
+                user.Role = userToBeUpdated.Role;
             }
 
-            _context.Update(updatedUser);   
+            _context.Update(user);   
             await _context.SaveChangesAsync();
 
-            return updatedUser;
+            return user;
         }
 
         public async Task<bool> DeleteUserAsync(int id, int userId)
         {
             string userRole = await GetUserRole(userId);
 
-            if (userRole == "Student" || userRole == "Teacher")
+            if (userRole != "Admin")
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
