@@ -33,6 +33,7 @@ namespace SchoolManagement.API.Services
                  Date = a.Date,
                  Present = a.Present,
                  Student = a.Student,
+                 Teacher = userRole == "Admin" || userRole == "Teacher" ? a.Teacher : null,
             }).ToListAsync();
         }
 
