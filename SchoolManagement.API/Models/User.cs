@@ -2,10 +2,17 @@
 {
     public class User
     {
+        public enum UserRole
+        {
+            Admin,
+            Teacher,
+            Student
+        }
+
         public int Id { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
-        public string Role { get; set; } // "Admin", "Teacher", "Student"
+        public UserRole Role { get; set; }
         public Teacher? Teacher { get; set; } //Uno a uno opcional
         public Student? Student { get; set; } //Uno a uno opcional
     }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
+using static SchoolManagement.API.Models.User;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -13,7 +14,6 @@ namespace SchoolManagement.API.Controllers
     {
         private readonly IUserService _userService = userService;
 
-        [Authorize(Roles = "Admin")]
         // GET: api/<UserController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetAllUsers(int userId)
@@ -36,20 +36,19 @@ namespace SchoolManagement.API.Controllers
             return Ok(user);
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUserRole(int id)
+        public async Task<ActionResult<UserRole>> GetUserRole(int id)
         {
-            string userRole = await _userService.GetUserRole(id);
+            UserRole userRole = await _userService.GetUserRole(id);
 
             return Ok(userRole);
         }
 
         // POST api/<UserController>
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User userToBeCreated)
+        public async Task<ActionResult<User>> PostUser(User userToBeCreated, int userId)
         {
-            User createdUser = await _userService.CreateUserAsync(userToBeCreated);
+            User createdUser = await _userService.CreateUserAsync(userToBeCreated, userId);
 
             return CreatedAtAction("GetUser", new { email = createdUser.Email}, createdUser);
         }
@@ -63,7 +62,6 @@ namespace SchoolManagement.API.Controllers
             return Ok(updatedUser);
         }
 
-        [Authorize(Roles = "Admin")]
         // DELETE api/<UserController>/5
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id, int useId)

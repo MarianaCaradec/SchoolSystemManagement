@@ -2,6 +2,7 @@
 using SchoolManagement.API.Data.Context;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
+using static SchoolManagement.API.Models.User;
 
 namespace SchoolManagement.API.Services
 {
@@ -11,11 +12,11 @@ namespace SchoolManagement.API.Services
 
         public async Task<IEnumerable<User>> GetUsersAsync(int userId)
         {
-            string userRole = await GetUserRole(userId);
+            UserRole userRole = await GetUserRole(userId);
 
             IQueryable<User> query = _context.Users.Include(u => u.Email).Include(u => u.Role);
 
-            if(userRole == "Admin")
+            if(userRole == UserRole.Admin)
             {
                 query = query
                     .Include(u => u.Password)
@@ -26,20 +27,20 @@ namespace SchoolManagement.API.Services
             return await query.Select(u => new User
             {
                 Email = u.Email,
-                Password = userRole == "Admin" ? u.Password : null,
+                Password = userRole == UserRole.Admin ? u.Password : null,
                 Role = u.Role,
-                Teacher = userRole == "Admin" ? u.Teacher : null,
-                Student = userRole == "Admin" ? u.Student : null,
+                Teacher = userRole == UserRole.Admin ? u.Teacher : null,
+                Student = userRole == UserRole.Admin ? u.Student : null,
             }).ToListAsync(); ;
         }
 
         public async Task<User> GetUserByEmailAsync(string email, int userId)
         {
-            string userRole = await GetUserRole(userId);
+            UserRole userRole = await GetUserRole(userId);
 
             IQueryable<User> query = _context.Users.Include(u => u.Email).Include(u => u.Role);
 
-            if(userRole == "Admin")
+            if(userRole == UserRole.Admin)
             {
                 query = query
                     .Include(u => u.Password)
@@ -54,7 +55,7 @@ namespace SchoolManagement.API.Services
             return user;
         }
 
-        public async Task<string> GetUserRole(int id)
+        public async Task<UserRole> GetUserRole(int id)
         {
             User user = await _context.Users
                 .Include(u => u.Teacher)
@@ -66,22 +67,38 @@ namespace SchoolManagement.API.Services
             return user.Role;
         }
 
-        public async Task<User> CreateUserAsync(User userToBeCreated)
+        public async Task<User> CreateUserAsync(User userToBeCreated, int userId)
         {
+            UserRole creatorRole = await GetUserRole(userId);
+
+            if(userToBeCreated.Role == UserRole.Admin && creatorRole != UserRole.Admin)
+            {
+                throw new UnauthorizedAccessException("Only Admin users can assign the Admin role to an user");
+            }
+
+            if(userToBeCreated.Role == UserRole.Teacher && creatorRole != UserRole.Admin)
+            {
+                throw new UnauthorizedAccessException("Only Admin users can assign the Teacher role to an user");
+            }
+
+            if(creatorRole == null)
+            {
+                userToBeCreated.Role = UserRole.Student;
+            }
+
+            if (!Enum.TryParse(userToBeCreated.Role.ToString(), true, out UserRole inputRole))
+            {
+                throw new ArgumentException($"Invalid role '{userToBeCreated.Role}'. Allowed roles are: Admin and Teacher for an Admin user, or Student for anyone.");
+            }
+
             User createdUser = new User
             {
                 Email = userToBeCreated.Email,
                 Password = userToBeCreated.Password,
-                Role = char.ToUpper(userToBeCreated.Role[0]) + userToBeCreated.Role.Substring(1).ToLower()
+                Role = inputRole
             };
 
-            if (createdUser.Id == null || createdUser.Id == 0)
-            {
-                Random random = new Random();
-                createdUser.Id = random.Next(1, int.MaxValue);
-            }
-
-            _context.Users.Add(userToBeCreated);
+            _context.Users.Add(createdUser);
             await _context.SaveChangesAsync();
 
             return createdUser;
@@ -89,7 +106,7 @@ namespace SchoolManagement.API.Services
 
         public async Task<User> UpdateUserAsync(int id, User userToBeUpdated, int userId)
         {
-            string userRole = await GetUserRole(userId);
+            UserRole userRole = await GetUserRole(userId);
 
             User user = await _context.Users
                 .Include(u => u.Email)
@@ -101,7 +118,7 @@ namespace SchoolManagement.API.Services
 
             if (user == null) throw new KeyNotFoundException($"User with ID {id} not found");
 
-            if (userRole != "Admin")
+            if (userRole != UserRole.Admin)
             {
                 user.Email = userToBeUpdated.Email;
                 user.Password = userToBeUpdated.Password;
@@ -121,9 +138,9 @@ namespace SchoolManagement.API.Services
 
         public async Task<bool> DeleteUserAsync(int id, int userId)
         {
-            string userRole = await GetUserRole(userId);
+            UserRole userRole = await GetUserRole(userId);
 
-            if (userRole != "Admin")
+            if (userRole != UserRole.Admin)
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }

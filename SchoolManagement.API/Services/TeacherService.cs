@@ -2,6 +2,7 @@
 using SchoolManagement.API.Data.Context;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
+using static SchoolManagement.API.Models.User;
 
 namespace SchoolManagement.API.Services
 {
@@ -12,9 +13,9 @@ namespace SchoolManagement.API.Services
 
         public async Task<IEnumerable<Teacher>> GetTeachersAsync(int userId)
         {
-            string userRole = await _userService.GetUserRole(userId);
+            UserRole userRole = await _userService.GetUserRole(userId);
 
-            if (userRole == "Student")
+            if (userRole == UserRole.Student)
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
@@ -24,7 +25,7 @@ namespace SchoolManagement.API.Services
                 .Include(t => t.Subjects)
                 .Include(t => t.Classes);
 
-            if (userRole == "Admin")
+            if (userRole == UserRole.Admin)
             {
                 query = query.Include(t => t.Attendances);
                 
@@ -41,15 +42,15 @@ namespace SchoolManagement.API.Services
                 User = t.User,
                 Subjects = t.Subjects.ToList(),
                 Classes = t.Classes.ToList(),
-                Attendances = userRole == "Admin" ? t.Attendances.ToList() : null,
+                Attendances = userRole == UserRole.Admin ? t.Attendances.ToList() : null,
             }).ToListAsync(); ;
         }
 
         public async Task<Teacher> GetTeacherByIdAsync(int id, int userId)
         {
-            string userRole = await _userService.GetUserRole(userId);
+            UserRole userRole = await _userService.GetUserRole(userId);
 
-            if (userRole == "Student")
+            if (userRole == UserRole.Student)
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
@@ -59,12 +60,12 @@ namespace SchoolManagement.API.Services
                 .Include(t => t.Subjects)
                 .Include(t => t.Classes);
 
-            if (userRole == "Admin")
+            if (userRole == UserRole.Admin)
             {
                 query = query.Include(t => t.Attendances);
             }
 
-            if (userRole == "Teacher" && id != userId)
+            if (userRole == UserRole.Teacher && id != userId)
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
@@ -78,9 +79,9 @@ namespace SchoolManagement.API.Services
 
         public async Task<Teacher> CreateTeacherAsync(Teacher teacherToBeCreated, int userId)
         {
-            string userRole = await _userService.GetUserRole(userId);
+            UserRole userRole = await _userService.GetUserRole(userId);
 
-            if (userRole != "Admin")
+            if (userRole != UserRole.Admin)
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
@@ -95,12 +96,6 @@ namespace SchoolManagement.API.Services
                 UserId = teacherToBeCreated.UserId,
             };
 
-            if (createdTeacher.Id == null || createdTeacher.Id == 0)
-            {
-                Random random = new Random();
-                createdTeacher.Id = random.Next(1, int.MaxValue);
-            }
-
             _context.Add(createdTeacher);
             await _context.SaveChangesAsync();
 
@@ -109,9 +104,9 @@ namespace SchoolManagement.API.Services
 
         public async Task<Teacher> UpdateTeacherAsync(int id, Teacher teacherToBeUpdated, int userId)
         {
-            string userRole = await _userService.GetUserRole(userId);
+            UserRole userRole = await _userService.GetUserRole(userId);
 
-            if (userRole == "Student")
+            if (userRole == UserRole.Student)
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
@@ -125,7 +120,7 @@ namespace SchoolManagement.API.Services
 
             if (teacher == null) throw new KeyNotFoundException($"Teacher with ID {id} not found.");
 
-            if (userRole == "Teacher")
+            if (userRole == UserRole.Teacher)
             {
                 if (id != userId)
                 {
@@ -154,9 +149,9 @@ namespace SchoolManagement.API.Services
 
     public async Task<bool> DeleteTeacherAsync(int id, int userId)
         {
-            string userRole = await _userService.GetUserRole(userId);
+            UserRole userRole = await _userService.GetUserRole(userId);
 
-            if (userRole != "Admin")
+            if (userRole != UserRole.Admin)
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }

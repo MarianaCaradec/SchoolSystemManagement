@@ -2,6 +2,7 @@
 using SchoolManagement.API.Data.Context;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
+using static SchoolManagement.API.Models.User;
 
 namespace SchoolManagement.API.Services
 {
@@ -12,16 +13,16 @@ namespace SchoolManagement.API.Services
 
         public async Task<IEnumerable<Subject>> GetSubjectsAsync(int userId)
         {
-            string userRole = await _userService.GetUserRole(userId);
+            UserRole userRole = await _userService.GetUserRole(userId);
 
             IQueryable<Subject> query = _context.Subjects.Include(sub => sub.Teachers);
 
-            if(userRole == "Teacher")
+            if(userRole == UserRole.Teacher)
             {
                 query = query.Where(sub => sub.Teachers.Any(t => t.Id == userId));
             }
             
-            if(userRole == "Student")
+            if(userRole == UserRole.Student)
             {
                 query = query.Include(sub => sub.Grades)
                 .Where(sub => sub.Grades.Any(g => g.StudentId == userId));
@@ -32,22 +33,22 @@ namespace SchoolManagement.API.Services
                 Id = sub.Id,
                 Title = sub.Title,
                 Teachers = sub.Teachers.ToList(),
-                Grades = userRole == "Student" ? sub.Grades.ToList() : null,
+                Grades = userRole == UserRole.Student ? sub.Grades.ToList() : null,
             }).ToListAsync(); ;
         }
 
         public async Task<Subject> GetSubjectByIdAsync(int id, int userId)
         {
-            string userRole = await _userService.GetUserRole(userId);
+            UserRole userRole = await _userService.GetUserRole(userId);
 
             IQueryable<Subject> query = _context.Subjects.Include(sub => sub.Teachers);
 
-            if (userRole == "Teacher")
+            if (userRole == UserRole.Teacher)
             {
                 query = query.Where(sub => sub.Teachers.Any(t => t.Id == userId));
             }
             
-            if (userRole == "Student")
+            if (userRole == UserRole.Student)
             {
                 query = query.Include(sub => sub.Grades).Where(sub => sub.Grades.Any(g => g.StudentId == userId));
             }
@@ -61,9 +62,9 @@ namespace SchoolManagement.API.Services
 
         public async Task<Subject> CreateSubjectAsync(Subject subjectToBeCreated, int userId)
         {
-            string userRole = await _userService.GetUserRole(userId);
+            UserRole userRole = await _userService.GetUserRole(userId);
 
-            if (userRole != "Admin")
+            if (userRole != UserRole.Admin)
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
@@ -75,12 +76,6 @@ namespace SchoolManagement.API.Services
                 Grades = subjectToBeCreated?.Grades
             };
 
-            if (createdSubject.Id == null || createdSubject.Id == 0)
-            {
-                Random random = new Random();
-                createdSubject.Id = random.Next(1, int.MaxValue);
-            }
-
             _context.Subjects.Add(createdSubject);
             await _context.SaveChangesAsync();
 
@@ -89,9 +84,9 @@ namespace SchoolManagement.API.Services
 
         public async Task<Subject> UpdateSubjectAsync(int id, Subject subjectToBeUpdated, int userId)
         {
-            string userRole = await _userService.GetUserRole(userId);
+            UserRole userRole = await _userService.GetUserRole(userId);
 
-            if (userRole != "Admin")
+            if (userRole != UserRole.Admin)
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
@@ -115,9 +110,9 @@ namespace SchoolManagement.API.Services
 
         public async Task<bool> DeleteSubjectAsync(int id, int userId)
         {
-            string userRole = await _userService.GetUserRole(userId);
+            UserRole userRole = await _userService.GetUserRole(userId);
 
-            if (userRole != "Admin")
+            if (userRole != UserRole.Admin)
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
