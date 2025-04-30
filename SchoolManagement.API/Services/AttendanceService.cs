@@ -15,55 +15,50 @@ namespace SchoolManagement.API.Services
         {
             string userRole = await _userService.GetUserRole(userId);
 
-            if(userRole == "Student")
+            IQueryable<Attendance> query = _context.Attendances.Include(a => a.Student);
+
+            if (userRole == "Student")
             {
-                return await _context.Attendances
-                    .Include(a => a.Student)
-                    .Where(a => a.Student.Id == userId)
-                    .Select(a => new Attendance
-                    {
-                       Id = a.Id,
-                       Date = a.Date,
-                       Present = a.Present,
-                       Student = a.Student,
-                    }).ToListAsync();
-            } else
+               query = query.Where(a => a.Student.Id == userId);
+
+            }
+            else
             {
-                return await _context.Attendances
-                    .Include(a => a.Student)
-                    .Include(a => a.Teacher)
-                    .Select(a => new Attendance
-                    {
-                        Id = a.Id,
-                        Date = a.Date,
-                        Present = a.Present,
-                        Student = a.Student,
-                        Teacher = a.Teacher
-                    }).ToListAsync();
-            }   
+               query = query.Include(a => a.Teacher);
+            }
+
+            return await query.Select(a => new Attendance
+            {
+                 Id = a.Id,
+                 Date = a.Date,
+                 Present = a.Present,
+                 Student = a.Student,
+                 Teacher = userRole == "Admin" || userRole == "Teacher" ? a.Teacher : null,
+            }).ToListAsync();
         }
 
         public async Task<Attendance> GetAttendanceByIdAsync(int id, int userId)
         {
             string userRole = await _userService.GetUserRole(userId);
 
-            Attendance attendance;
+            IQueryable<Attendance> query = _context.Attendances.Include(a => a.Student);
 
-            if (userRole == "Student")
+            if (userRole == "Teacher" || userRole == "Admin")
             {
-                attendance = await _context.Attendances
-                    .Include(a => a.Student)
-                    .Where(a => a.Student.Id == userId)
-                    .FirstOrDefaultAsync(a => a.Id == id);
-            } else
-            {
-                attendance = await _context.Attendances
-                    .Include(a => a.Student)
-                    .Include(a => a.Teacher)
-                    .FirstOrDefaultAsync(a => a.Id == id);
-            } 
+                query = query.Include(a => a.Teacher);
+            }
 
-            if (attendance == null) throw new KeyNotFoundException($"Attendance with ID {id} not found.");
+            Attendance attendance = await query.FirstOrDefaultAsync(a => a.Id == id);
+
+            if (attendance == null)
+            {
+                throw new KeyNotFoundException($"Attendance with ID {id} not found.");
+            }
+
+            if (userRole == "Student" && attendance.StudentId != userId)
+            {
+                throw new UnauthorizedAccessException("You are not authorized to do this action.");
+            }
 
             return attendance;
         }
@@ -106,57 +101,49 @@ namespace SchoolManagement.API.Services
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
 
-            Attendance updatedAttendance;
+            IQueryable<Attendance> query = _context.Attendances.Include(a => a.Student);
+
+            Attendance attendance = query.FirstOrDefault(a => a.Id == id);
+
+            if (attendance == null) throw new KeyNotFoundException($"Attendance with ID {id} not found.");
 
             if (userRole == "Teacher")
             {
-                DateTime currentDate = DateTime.Now;
-                DateTime attendanceDate = attendanceToBeUpdated.Date.ToDateTime(TimeOnly.MinValue);
-
-
-                if ((currentDate - attendanceDate).TotalDays < 21)
+                if (!attendance.Student.Class.Teachers.Any(t => t.Id == userId))
                 {
-                    updatedAttendance = await _context.Attendances
-                        .Include(a => a.Student)
-                        .Where(a => a.Student.Class.Teachers.Any(t => t.Id == userId))
-                        .FirstOrDefaultAsync(a => a.Id == id);
+                    throw new UnauthorizedAccessException("You are not authorized to do this action.");
 
-                    if (updatedAttendance == null) throw new KeyNotFoundException($"Attendance with ID {id} not found.");
+                }
 
-                    updatedAttendance.Date = attendanceToBeUpdated.Date;
-                    updatedAttendance.Present = attendanceToBeUpdated.Present;
-                    updatedAttendance.StudentId = studentId;
-                } else
+                DateTime currentDate = DateTime.Now;
+                DateTime attendanceDate = attendance.Date.ToDateTime(TimeOnly.MinValue);
+
+                if ((currentDate - attendanceDate).TotalDays >= 21)
                 {
                     throw new InvalidOperationException("Attendance update is not allowed after three weeks.");
                 }
+            } 
 
-            } else
+            if(userRole == "Admin")
             {
-                updatedAttendance = await _context.Attendances
-                   .Include(a => a.Student)
-                   .Include(a => a.Teacher)
-                   .FirstOrDefaultAsync(a => a.Id == id);
-
-                if (updatedAttendance == null) throw new KeyNotFoundException($"Attendance with ID {id} not found.");
-
-                updatedAttendance.Date = attendanceToBeUpdated.Date;
-                updatedAttendance.Present = attendanceToBeUpdated.Present;
-                updatedAttendance.StudentId = studentId;
-                updatedAttendance.TeacherId = teacherId;
+                attendance.TeacherId = teacherId;
             }
 
-            _context.Attendances.Update(updatedAttendance);
+            attendance.Date = attendanceToBeUpdated.Date;
+            attendance.Present = attendanceToBeUpdated.Present;
+            attendance.StudentId = studentId;
+
+            _context.Attendances.Update(attendance);
             await _context.SaveChangesAsync();
 
-            return updatedAttendance;
+            return attendance;
         }
 
         public async Task<bool> DeleteAttendanceAsync(int id, int userId)
         {
             string userRole = await _userService.GetUserRole(userId);
 
-            if(userRole == "Teacher" || userRole == "Student")
+            if(userRole != "Admin")
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }

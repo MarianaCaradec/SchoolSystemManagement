@@ -14,23 +14,22 @@ namespace SchoolManagement.API.Services
         {
             string userRole = await _userService.GetUserRole(userId);
 
+            IQueryable<Grade> query = _context.Grades.Include(g => g.Student).Include(g => g.Subject);
+
             if (userRole == "Student")
             {
-                throw new UnauthorizedAccessException("You are not authorized to do this action.");
+                query = query.Where(g => g.StudentId == userId);
             }
 
-            return await _context.Grades
-                .Include(g => g.Student)
-                .Include(g => g.Subject)
+            return await query
                 .Select(g => new Grade
-                {
-                    Id = g.Id,
-                    Value = g.Value,
-                    Date = g.Date,
-                    Student = g.Student,
-                    Subject = g.Subject
-
-                }) .ToListAsync();
+            {
+                Id = g.Id,
+                Value = g.Value,
+                Date = g.Date,
+                Student = g.Student,
+                Subject = g.Subject
+            }).ToListAsync(); ;
         }
 
         public async Task<Grade> GetGradeByIdAsync(int id, int userId)
@@ -88,16 +87,6 @@ namespace SchoolManagement.API.Services
             if (userRole == "Student")
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
-            } else if (userRole == "Teacher")
-            {
-                DateTime currentDate = DateTime.Now;
-                DateTime gradeDate = gradeToBeUpdated.Date.ToDateTime(TimeOnly.MinValue);
-
-
-                if ((currentDate - gradeDate).TotalDays > 21)
-                {
-                    throw new InvalidOperationException("Grade update is not allowed after three weeks.");
-                }
             }
 
             Grade grade = await _context.Grades
@@ -106,6 +95,24 @@ namespace SchoolManagement.API.Services
                 .FirstOrDefaultAsync(g => g.Id == id);
 
             if (grade == null) throw new KeyNotFoundException($"Grade with ID {id} not found");
+
+            if (userRole == "Teacher")
+            {
+                if(!grade.Student.Class.Teachers.Any(t => t.Id == userId))
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to do this action.");
+
+                }
+
+                DateTime currentDate = DateTime.Now;
+                DateTime gradeDate = grade.Date.ToDateTime(TimeOnly.MinValue);
+
+
+                if ((currentDate - gradeDate).TotalDays >= 21)
+                {
+                    throw new InvalidOperationException("Grade update is not allowed after three weeks.");
+                }
+            }
 
             grade.Value = gradeToBeUpdated.Value;
             grade.Date = gradeToBeUpdated.Date;
@@ -122,7 +129,7 @@ namespace SchoolManagement.API.Services
         {
             string userRole = await _userService.GetUserRole(userId);
 
-            if (userRole == "Student" || userRole == "Teacher")
+            if (userRole != "Admin")
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }

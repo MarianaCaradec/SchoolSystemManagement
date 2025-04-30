@@ -14,107 +14,63 @@ namespace SchoolManagement.API.Services
         {
             string userRole = await _userService.GetUserRole(userId);
 
-            IEnumerable<Student> students;
+            IQueryable<Student> query = _context.Students
+                    .Include(s => s.User)
+                    .Include(st => st.Class)
+                    .Include(st => st.Attendances)
+                    .Include(st => st.Grades);
 
             if (userRole == "Teacher")
             {
-               students = await _context.Students
-                    .Include(s => s.User)
-                    .Include(st => st.Class)
-                    .Include(st => st.Attendances)
-                    .Include(st => st.Grades)
-                    .Where(s => s.Class.Teachers.Any(t => t.Id == userId))
-                    .Select(st => new Student
-                    {
-                        Id = st.Id,
-                        Name = st.Name,
-                        Surname = st.Surname,
-                        BirthDate = st.BirthDate,
-                        Address = st.Address,
-                        MobileNumber = st.MobileNumber,
-                        User = st.User,
-                        Class = st.Class,
-                        Attendances = st.Attendances.ToList(),
-                        Grades = st.Grades.ToList()
-                    }).ToListAsync();
-            } else if(userRole == "Student")
-            {
-                students = await _context.Students
-                    .Include(s => s.User)
-                    .Include(st => st.Class)
-                    .Include(st => st.Attendances)
-                    .Include(st => st.Grades)
-                    .Where(s => s.Class.Students.Any(s => s.Id == userId))
-                    .Select(st => new Student
-                    {
-                        Id = st.Id,
-                        Name = st.Name,
-                        Surname = st.Surname,
-                        BirthDate = st.BirthDate,
-                        Address = st.Address,
-                        MobileNumber = st.MobileNumber,
-                        User = st.User,
-                        Class = st.Class,
-                        Attendances = st.Attendances.ToList(),
-                        Grades = st.Grades.ToList()
-                    }).ToListAsync();
-            } else
-            {
-                students = await _context.Students
-                    .Include(s => s.User)
-                    .Include(st => st.Class)
-                    .Include(st => st.Attendances)
-                    .Include(st => st.Grades)
-                    .Select(st => new Student
-                    {
-                        Id = st.Id,
-                        Name = st.Name,
-                        Surname = st.Surname,
-                        BirthDate = st.BirthDate,
-                        Address = st.Address,
-                        MobileNumber = st.MobileNumber,
-                        User = st.User,
-                        Class = st.Class,
-                        Attendances = st.Attendances.ToList(),
-                        Grades = st.Grades.ToList()
-                    }).ToListAsync();
+                query = query.Where(s => s.Class.Teachers.Any(t => t.Id == userId));
             }
+            
+            if(userRole == "Student")
+            {
+                query = query.Where(s => s.Class.Students.Any(s => s.Id == userId));
+            } 
 
-            return students;
+            return await query.Select(st => new Student
+            {
+                Id = st.Id,
+                Name = st.Name,
+                Surname = st.Surname,
+                BirthDate = st.BirthDate,
+                Address = st.Address,
+                MobileNumber = st.MobileNumber,
+                User = st.User,
+                Class = st.Class,
+                Attendances = st.Attendances.ToList(),
+                Grades = st.Grades.ToList()
+            }).ToListAsync(); ;
         }
 
         public async Task<Student> GetStudentByIdAsync(int id, int userId)
         {
             string userRole = await _userService.GetUserRole(userId);
 
-            Student student;
+            IQueryable<Student> query = _context.Students
+                .Include(st => st.User)
+                .Include(st => st.Class)
+                .Include(st => st.Attendances)
+                .Include(st => st.Grades);
 
             if (userRole == "Teacher")
             {
-                student = await _context.Students
-                .Include(st => st.User)
-                .Include(st => st.Class)
-                .Include(st => st.Attendances)
-                .Include(st => st.Grades)
-                .Where(st => st.Class.Teachers.Any(t => t.Id == userId))
-                .FirstOrDefaultAsync(st => st.Id == id);
-            } else if(userRole == "Student")
-            {
-                student = await _context.Students
-                .Include(st => st.User)
-                .Include(st => st.Class)
-                .Include(st => st.Attendances)
-                .Include(st => st.Grades)
-                .FirstOrDefaultAsync(st => st.Id == id && st.Id == userId);
-            } else
-            {
-                student = await _context.Students
-                 .Include(st => st.User)
-                 .Include(st => st.Class)
-                 .Include(st => st.Attendances)
-                 .Include(st => st.Grades)
-                 .FirstOrDefaultAsync(st => st.Id == id);
+                query = query.Where(st => st.Class.Teachers.Any(t => t.Id == userId));
             }
+            
+            if(userRole == "Student")
+            {
+                if (id != userId)
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to access this student.");
+                }
+
+                query = query.Where(st => st.Id == userId);
+            }
+
+            Student student = await query.FirstOrDefaultAsync(st => st.Id == id);
 
             if (student == null) throw new KeyNotFoundException($"Student with ID {id} not found.");
 
@@ -125,7 +81,7 @@ namespace SchoolManagement.API.Services
         {
             string userRole = await _userService.GetUserRole(userId);
 
-            if(userRole == "Teacher" || userRole == "Student")
+            if(userRole != "Admin")
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
@@ -162,45 +118,50 @@ namespace SchoolManagement.API.Services
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
 
-            Student updatedStudent = await _context.Students
+            Student student = await _context.Students
                 .Include(st => st.User)
                 .Include(st => st.Class)
                 .Include(st => st.Attendances)
                 .Include(st => st.Grades)
                 .FirstOrDefaultAsync(st => st.Id == id);
 
-            if (updatedStudent == null) throw new KeyNotFoundException($"Student with ID {id} not found.");
+            if (student == null) throw new KeyNotFoundException($"Student with ID {id} not found.");
 
             if(userRole == "Student")
             {
-                updatedStudent.Name = studentToBeUpdated.Name;
-                updatedStudent.Surname = studentToBeUpdated.Surname;
-                updatedStudent.BirthDate = studentToBeUpdated.BirthDate;
-                updatedStudent.Address = studentToBeUpdated.Address;
-                updatedStudent.MobileNumber = studentToBeUpdated.MobileNumber;
-            } else
-            {
-                updatedStudent.Name = studentToBeUpdated.Name;
-                updatedStudent.Surname = studentToBeUpdated.Surname;
-                updatedStudent.BirthDate = studentToBeUpdated.BirthDate;
-                updatedStudent.Address = studentToBeUpdated.Address;
-                updatedStudent.MobileNumber = studentToBeUpdated.MobileNumber;
-                updatedStudent.ClassId = studentToBeUpdated.ClassId;
-                updatedStudent.Attendances = studentToBeUpdated.Attendances ?? updatedStudent.Attendances;
-                updatedStudent.Grades = studentToBeUpdated.Grades ?? updatedStudent.Grades;
-            }
+                if(id != userId)
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to do this action.");
 
-            _context.Students.Update(updatedStudent);
+                }
+
+                student.Name = studentToBeUpdated.Name;
+                student.Surname = studentToBeUpdated.Surname;
+                student.BirthDate = studentToBeUpdated.BirthDate;
+                student.Address = studentToBeUpdated.Address;
+                student.MobileNumber = studentToBeUpdated.MobileNumber;
+            } 
+
+             student.Name = studentToBeUpdated.Name;
+             student.Surname = studentToBeUpdated.Surname;
+             student.BirthDate = studentToBeUpdated.BirthDate;
+             student.Address = studentToBeUpdated.Address;
+             student.MobileNumber = studentToBeUpdated.MobileNumber;
+             student.ClassId = studentToBeUpdated.ClassId;
+             student.Attendances = studentToBeUpdated.Attendances ?? student.Attendances;
+             student.Grades = studentToBeUpdated.Grades ?? student.Grades;
+
+            _context.Students.Update(student);
             await _context.SaveChangesAsync();
 
-            return updatedStudent;
+            return student;
         }
 
         public async Task<bool> DeleteStudentAsync(int id, int userId)
         {
             string userRole = await _userService.GetUserRole(userId);
 
-            if(userRole == "Teacher" || userRole == "Student")
+            if(userRole != "Admin")
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }

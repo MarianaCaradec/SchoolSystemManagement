@@ -14,68 +14,48 @@ namespace SchoolManagement.API.Services
         {
             string userRole = await _userService.GetUserRole(userId);
 
-            if(userRole == "Student")
+            if (userRole == "Student")
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
 
-            IEnumerable<Class> classes;
+            IQueryable<Class> query = _context.Classes.Include(c => c.Teachers).Include(c => c.Students);
 
             if(userRole == "Teacher")
             {
-               classes = await _context.Classes
-                .Include(c => c.Teachers)
-                .Include(c => c.Students)
-                .Where(c => c.Teachers.Any(t => t.Id == userId))
-                .Select(c => new Class
-                {
-                    Id = c.Id,
-                    Course = c.Course,
-                    Divition = c.Divition,
-                    Capacity = c.Capacity,
-                    Teachers = c.Teachers.ToList(),
-                    Students = c.Students.ToList()
-                }).ToListAsync();
+                query = query.Where(c => c.Teachers.Any(t => t.Id == userId));
             }
 
-            classes = await _context.Classes
-                .Include(c => c.Teachers)
-                .Include(c => c.Students)
-                .Select(c => new Class
-                {
-                    Id = c.Id,
-                    Course = c.Course,
-                    Divition = c.Divition,
-                    Capacity = c.Capacity,
-                    Teachers = c.Teachers.ToList(),
-                    Students = c.Students.ToList()
-                }).ToListAsync();
-
-            return classes;
+            return await query.Select(c => new Class
+            {
+                Id = c.Id,
+                Course = c.Course,
+                Divition = c.Divition,
+                Capacity = c.Capacity,
+                Teachers = c.Teachers.ToList(),
+                Students = c.Students.ToList()
+            }).ToListAsync();
         }
 
         public async Task<Class> GetClassByIdAsync(int id, int userId)
         {
             string userRole = await _userService.GetUserRole(userId);
 
-            Class classById;
+            IQueryable<Class> query = _context.Classes.Include(c => c.Teachers).Include(c => c.Students);
 
-            if (userRole == "Student" || userRole == "Teacher")
-            {
-                classById = await _context.Classes
-                .Include(c => c.Teachers)
-                .Include(c => c.Students)
-                .Where(c => c.Students.Any(s => s.Id == userId) || c.Teachers.Any(t => t.Id == userId))
-                .FirstOrDefaultAsync(c => c.Id == id);
-            } else
-            {
-                classById = await _context.Classes
-                    .Include(c => c.Teachers)
-                    .Include(c => c.Students)
-                    .FirstOrDefaultAsync(c => c.Id == id);
-            }
+            Class classById = await query.FirstOrDefaultAsync(c => c.Id == id);
 
             if (classById == null) throw new KeyNotFoundException($"Class with ID {id} not found.");
+
+            if (userRole == "Teacher" && !classById.Teachers.Any(t => t.Id == userId))
+            {
+                throw new UnauthorizedAccessException("You are not authorized to do this action.");
+            }
+
+            if(userRole == "Student" && !classById.Students.Any(s => s.Id == userId))
+            {
+                throw new UnauthorizedAccessException("You are not authorized to do this action.");
+            }
 
             return classById;
         }
@@ -84,7 +64,7 @@ namespace SchoolManagement.API.Services
         {
             string userRole = await _userService.GetUserRole(userId);
 
-            if (userRole == "Student" || userRole == "Teacher")
+            if (userRole != "Admin")
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
@@ -114,7 +94,7 @@ namespace SchoolManagement.API.Services
         {
             string userRole = await _userService.GetUserRole(userId);
 
-            if (userRole == "Student" || userRole == "Teacher")
+            if (userRole != "Admin")
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
@@ -142,7 +122,7 @@ namespace SchoolManagement.API.Services
         {
             string userRole = await _userService.GetUserRole(userId);
 
-            if (userRole == "Student" || userRole == "Teacher")
+            if (userRole != "Admin")
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
