@@ -2,6 +2,7 @@
 using SchoolManagement.API.Data.Context;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
+using static SchoolManagement.API.Models.User;
 
 namespace SchoolManagement.API.Services
 {
@@ -12,16 +13,16 @@ namespace SchoolManagement.API.Services
 
         public async Task<IEnumerable<Class>> GetClassesAsync(int userId)
         {
-            string userRole = await _userService.GetUserRole(userId);
+            UserRole userRole = await _userService.GetUserRole(userId);
 
-            if (userRole == "Student")
+            if (userRole == UserRole.Student)
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
 
             IQueryable<Class> query = _context.Classes.Include(c => c.Teachers).Include(c => c.Students);
 
-            if(userRole == "Teacher")
+            if(userRole == UserRole.Teacher)
             {
                 query = query.Where(c => c.Teachers.Any(t => t.Id == userId));
             }
@@ -39,7 +40,7 @@ namespace SchoolManagement.API.Services
 
         public async Task<Class> GetClassByIdAsync(int id, int userId)
         {
-            string userRole = await _userService.GetUserRole(userId);
+            UserRole userRole = await _userService.GetUserRole(userId);
 
             IQueryable<Class> query = _context.Classes.Include(c => c.Teachers).Include(c => c.Students);
 
@@ -47,12 +48,12 @@ namespace SchoolManagement.API.Services
 
             if (classById == null) throw new KeyNotFoundException($"Class with ID {id} not found.");
 
-            if (userRole == "Teacher" && !classById.Teachers.Any(t => t.Id == userId))
+            if (userRole == UserRole.Teacher && !classById.Teachers.Any(t => t.Id == userId))
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
 
-            if(userRole == "Student" && !classById.Students.Any(s => s.Id == userId))
+            if(userRole == UserRole.Student && !classById.Students.Any(s => s.Id == userId))
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
@@ -62,9 +63,9 @@ namespace SchoolManagement.API.Services
 
         public async Task<Class> CreateClassAsync(Class classToBeCreated, int userId)
         {
-            string userRole = await _userService.GetUserRole(userId);
+            UserRole userRole = await _userService.GetUserRole(userId);
 
-            if (userRole != "Admin")
+            if (userRole != UserRole.Admin)
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
@@ -78,12 +79,6 @@ namespace SchoolManagement.API.Services
                 Students = classToBeCreated.Students
             };
 
-            if (createdClass.Id == null || createdClass.Id == 0)
-            {
-                Random random = new Random();
-                createdClass.Id = random.Next(1, int.MaxValue);
-            }
-
             _context.Classes.Add(createdClass);
             await _context.SaveChangesAsync();
 
@@ -92,9 +87,9 @@ namespace SchoolManagement.API.Services
 
         public async Task<Class> UpdateClassAsync(int id, Class classToBeUpdated, int userId)
         {
-            string userRole = await _userService.GetUserRole(userId);
+            UserRole userRole = await _userService.GetUserRole(userId);
 
-            if (userRole != "Admin")
+            if (userRole != UserRole.Admin)
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
@@ -120,9 +115,9 @@ namespace SchoolManagement.API.Services
 
         public async Task<bool> DeleteClassAsync(int id, int userId)
         {
-            string userRole = await _userService.GetUserRole(userId);
+            UserRole userRole = await _userService.GetUserRole(userId);
 
-            if (userRole != "Admin")
+            if (userRole != UserRole.Admin)
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
