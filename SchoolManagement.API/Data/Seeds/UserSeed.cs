@@ -14,42 +14,42 @@ namespace SchoolManagement.API.Data.Seeds
                     Id = 1,
                     Email = "pepitoaurelio@test.com",
                     Password = "hashedpassword645",
-                    Role = "Student"
+                    Role = User.UserRole.Student,
                 },
                 new User
                 {
                   Id = 2,
                   Email = "martamaria@test.com",
                   Password = "hashedpassword547",
-                  Role = "Student"
+                  Role = User.UserRole.Student,
                 },
                 new User
                 {
                     Id = 3,
                     Email = "rosalopez@test.com",
                     Password = "hashedpassword687",
-                    Role = "Student"
+                    Role = User.UserRole.Student,
                 },
                 new User
                 {
                     Id = 4,
                     Email = "roberto@test.com",
                     Password = "hashedpassword79889",
-                    Role = "Teacher"
+                    Role = User.UserRole.Teacher,
                 },
                 new User
                 {
                     Id = 5,
                     Email = "tatamartino@test.com",
                     Password = "hashedpassword98347",
-                    Role = "Teacher"
+                    Role = User.UserRole.Teacher,
                 },
                 new User
                 {
                     Id = 6,
                     Email = "roccototo@test.com",
                     Password = "hashedpassword8437",
-                    Role = "Teacher"
+                    Role = User.UserRole.Teacher,
                 }
                 );
         }
