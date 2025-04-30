@@ -29,7 +29,6 @@ namespace SchoolManagement.API.Services
                 Date = g.Date,
                 Student = g.Student,
                 Subject = g.Subject
-
             }).ToListAsync(); ;
         }
 
