@@ -19,49 +19,30 @@ namespace SchoolManagement.API.Services
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
 
-            IEnumerable<Teacher> teachers;
+            IQueryable<Teacher> query = _context.Teachers
+                .Include(t => t.User)
+                .Include(t => t.Subjects)
+                .Include(t => t.Classes);
 
-            if(userRole == "Teacher")
+            if (userRole == "Admin")
             {
-                teachers = await _context.Teachers
-                .Include(t => t.User)
-                .Include(t => t.Subjects)
-                .Include(t => t.Classes)
-                .Select(t => new Teacher
-                {
-                    Id = t.Id,
-                    Name = t.Name,
-                    Surname = t.Surname,
-                    BirthDate = t.BirthDate,
-                    Address = t.Address,
-                    MobileNumber = t.MobileNumber,
-                    User = t.User,
-                    Subjects = t.Subjects.ToList(),
-                    Classes = t.Classes.ToList(),
-                }).ToListAsync();
-            } else
-            {
-                teachers = await _context.Teachers
-                .Include(t => t.User)
-                .Include(t => t.Subjects)
-                .Include(t => t.Classes)
-                .Include(t => t.Attendances)
-                .Select(t => new Teacher
-                {
-                    Id = t.Id,
-                    Name = t.Name,
-                    Surname = t.Surname,
-                    BirthDate = t.BirthDate,
-                    Address = t.Address,
-                    MobileNumber = t.MobileNumber,
-                    User = t.User,
-                    Subjects = t.Subjects.ToList(),
-                    Classes = t.Classes.ToList(),
-                    Attendances = t.Attendances.ToList()
-                }).ToListAsync();
+                query = query.Include(t => t.Attendances);
+                
             }
 
-            return teachers;
+            return await query.Select(t => new Teacher
+            {
+                Id = t.Id,
+                Name = t.Name,
+                Surname = t.Surname,
+                BirthDate = t.BirthDate,
+                Address = t.Address,
+                MobileNumber = t.MobileNumber,
+                User = t.User,
+                Subjects = t.Subjects.ToList(),
+                Classes = t.Classes.ToList(),
+                Attendances = userRole == "Admin" ? t.Attendances.ToList() : null,
+            }).ToListAsync(); ;
         }
 
         public async Task<Teacher> GetTeacherByIdAsync(int id, int userId)
@@ -73,36 +54,22 @@ namespace SchoolManagement.API.Services
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
 
-            Teacher teacher;
-
-            if (userRole == "Teacher")
-            {
-                teacher = await _context.Teachers
+            IQueryable<Teacher> query = _context.Teachers
                 .Include(t => t.User)
                 .Include(t => t.Subjects)
-                .Include(t => t.Classes)
-                .FirstOrDefaultAsync(t => t.Id == id);
+                .Include(t => t.Classes);
 
-                bool isTeacherData = teacher.Id == userId;
-
-                if (isTeacherData)
-                {
-                    teacher = await _context.Teachers
-                    .Include(t => t.User)
-                    .Include(t => t.Subjects)
-                    .Include(t => t.Classes)
-                    .Include(t => t.Attendances)
-                    .FirstOrDefaultAsync(t => t.Id == id);
-                }
-            } else
+            if (userRole == "Admin")
             {
-                teacher = await _context.Teachers
-                .Include(t => t.User)
-                .Include(t => t.Subjects)
-                .Include(t => t.Classes)
-                .Include (t => t.Attendances)
-                .FirstOrDefaultAsync(t => t.Id == id);
+                query = query.Include(t => t.Attendances);
             }
+
+            if (userRole == "Teacher" && id != userId)
+            {
+                throw new UnauthorizedAccessException("You are not authorized to do this action.");
+            }
+
+            Teacher teacher = await query.FirstOrDefaultAsync(t => t.Id == id);
 
             if (teacher == null) throw new KeyNotFoundException($"Teacher with ID {id} not found.");
 
@@ -113,7 +80,7 @@ namespace SchoolManagement.API.Services
         {
             string userRole = await _userService.GetUserRole(userId);
 
-            if (userRole == "Student" || userRole == "Teacher")
+            if (userRole != "Admin")
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
@@ -149,43 +116,47 @@ namespace SchoolManagement.API.Services
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
 
-            Teacher updatedTeacher = await _context.Teachers
+            Teacher teacher = await _context.Teachers
                 .Include(t => t.User)
                 .Include(t => t.Subjects)
                 .Include(t => t.Classes)
                 .Include(t => t.Attendances)
                 .FirstOrDefaultAsync(t => t.Id == id);
 
-            if (updatedTeacher == null) throw new KeyNotFoundException($"Teacher with ID {id} not found.");
+            if (teacher == null) throw new KeyNotFoundException($"Teacher with ID {id} not found.");
 
             if (userRole == "Teacher")
             {
-                updatedTeacher.Name = teacherToBeUpdated.Name;
-                updatedTeacher.Surname = teacherToBeUpdated.Surname;
-                updatedTeacher.BirthDate = teacherToBeUpdated.BirthDate;
-                updatedTeacher.MobileNumber = teacherToBeUpdated.MobileNumber;
-            } else
-            {
-                updatedTeacher.Name = teacherToBeUpdated.Name;
-                updatedTeacher.Surname = teacherToBeUpdated.Surname;
-                updatedTeacher.BirthDate = teacherToBeUpdated.BirthDate;
-                updatedTeacher.MobileNumber = teacherToBeUpdated.MobileNumber;
-                updatedTeacher.Subjects = teacherToBeUpdated.Subjects ?? updatedTeacher.Subjects;
-                updatedTeacher.Classes = teacherToBeUpdated.Classes ?? updatedTeacher.Classes;
-                updatedTeacher.Attendances = teacherToBeUpdated.Attendances ?? updatedTeacher.Attendances;
-            }
+                if (id != userId)
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to do this action.");
+                }
 
-            _context.Update(updatedTeacher);
+                teacher.Name = teacherToBeUpdated.Name;
+                teacher.Surname = teacherToBeUpdated.Surname;
+                teacher.BirthDate = teacherToBeUpdated.BirthDate;
+                teacher.MobileNumber = teacherToBeUpdated.MobileNumber;
+            } 
+
+            teacher.Name = teacherToBeUpdated.Name;
+            teacher.Surname = teacherToBeUpdated.Surname;
+            teacher.BirthDate = teacherToBeUpdated.BirthDate;
+            teacher.MobileNumber = teacherToBeUpdated.MobileNumber;
+            teacher.Subjects = teacherToBeUpdated.Subjects ?? teacher.Subjects;
+            teacher.Classes = teacherToBeUpdated.Classes ?? teacher.Classes;
+            teacher.Attendances = teacherToBeUpdated.Attendances ?? teacher.Attendances;
+
+            _context.Update(teacher);
             await _context.SaveChangesAsync();
 
-            return updatedTeacher;
+            return teacher;
         }
 
     public async Task<bool> DeleteTeacherAsync(int id, int userId)
         {
             string userRole = await _userService.GetUserRole(userId);
 
-            if (userRole == "Student" || userRole == "Teacher")
+            if (userRole != "Admin")
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
