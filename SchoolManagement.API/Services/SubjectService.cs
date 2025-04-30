@@ -32,7 +32,7 @@ namespace SchoolManagement.API.Services
                 Id = sub.Id,
                 Title = sub.Title,
                 Teachers = sub.Teachers.ToList(),
-                Grades = sub.Grades.ToList(),
+                Grades = userRole == "Student" ? sub.Grades.ToList() : null,
             }).ToListAsync(); ;
         }
 
@@ -40,9 +40,7 @@ namespace SchoolManagement.API.Services
         {
             string userRole = await _userService.GetUserRole(userId);
 
-            IQueryable<Subject> query = _context.Subjects
-                .Include(sub => sub.Teachers)
-                .Include(sub => sub.Grades);
+            IQueryable<Subject> query = _context.Subjects.Include(sub => sub.Teachers);
 
             if (userRole == "Teacher")
             {
@@ -51,7 +49,7 @@ namespace SchoolManagement.API.Services
             
             if (userRole == "Student")
             {
-                query = query.Where(sub => sub.Grades.Any(g => g.StudentId == userId));
+                query = query.Include(sub => sub.Grades).Where(sub => sub.Grades.Any(g => g.StudentId == userId));
             }
 
             Subject subject = await query.FirstOrDefaultAsync(sub => sub.Id == id);
