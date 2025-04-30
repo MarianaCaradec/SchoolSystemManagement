@@ -2,6 +2,7 @@
 using SchoolManagement.API.Data.Context;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
+using static SchoolManagement.API.Models.User;
 
 namespace SchoolManagement.API.Services
 {
@@ -12,11 +13,11 @@ namespace SchoolManagement.API.Services
 
         public async Task<IEnumerable<Grade>> GetGradesAsync(int userId)
         {
-            string userRole = await _userService.GetUserRole(userId);
+            UserRole userRole = await _userService.GetUserRole(userId);
 
             IQueryable<Grade> query = _context.Grades.Include(g => g.Student).Include(g => g.Subject);
 
-            if (userRole == "Student")
+            if (userRole == UserRole.Student)
             {
                 query = query.Where(g => g.StudentId == userId);
             }
@@ -34,7 +35,7 @@ namespace SchoolManagement.API.Services
 
         public async Task<Grade> GetGradeByIdAsync(int id, int userId)
         {
-            string userRole = await _userService.GetUserRole(userId);
+            UserRole userRole = await _userService.GetUserRole(userId);
 
             Grade grade = await _context.Grades
                 .Include(g => g.Student)
@@ -43,7 +44,7 @@ namespace SchoolManagement.API.Services
 
             if(grade == null) throw new KeyNotFoundException($"Grade with ID {id} not found");
 
-            if (userRole == "Student" && grade.StudentId != userId)
+            if (userRole == UserRole.Student && grade.StudentId != userId)
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
@@ -53,9 +54,23 @@ namespace SchoolManagement.API.Services
 
         public async Task<Grade> CreateGradeAsync(Grade gradeToBeCreated, int userId)
         {
-            string userRole = await _userService.GetUserRole(userId);
+            UserRole userRole = await _userService.GetUserRole(userId);
 
-            if (userRole == "Student")
+            if (userRole == UserRole.Student)
+            {
+                throw new UnauthorizedAccessException("You are not authorized to do this action.");
+            }
+            //Trying eager loading for perfomance
+            Student studentWithClassAndTeachers = await _context.Students
+                    .Include(s => s.Class.Teachers)
+                    .FirstOrDefaultAsync(s => s.Id == gradeToBeCreated.StudentId);
+
+            if (studentWithClassAndTeachers == null)
+            {
+                throw new ArgumentException("Invalid student or class information.");
+            }
+
+            if (userRole == UserRole.Teacher && !studentWithClassAndTeachers.Class.Teachers.Any(t => t.Id == userId))
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
@@ -68,12 +83,6 @@ namespace SchoolManagement.API.Services
                 SubjectId = gradeToBeCreated.SubjectId
             };
 
-            if(createdGrade.Id == null || createdGrade.Id == 0)
-            {
-                Random random = new Random();
-                createdGrade.Id = random.Next(1, int.MaxValue);
-            }
-
             _context.Grades.Add(createdGrade);
             await _context.SaveChangesAsync();
 
@@ -82,9 +91,9 @@ namespace SchoolManagement.API.Services
 
         public async Task<Grade> UpdateGradeAsync(int id, Grade gradeToBeUpdated, int studentId, int subjectId, int userId)
         {
-            string userRole = await _userService.GetUserRole(userId);
+            UserRole userRole = await _userService.GetUserRole(userId);
 
-            if (userRole == "Student")
+            if (userRole == UserRole.Student)
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
@@ -96,7 +105,7 @@ namespace SchoolManagement.API.Services
 
             if (grade == null) throw new KeyNotFoundException($"Grade with ID {id} not found");
 
-            if (userRole == "Teacher")
+            if (userRole == UserRole.Teacher)
             {
                 if(!grade.Student.Class.Teachers.Any(t => t.Id == userId))
                 {
@@ -127,9 +136,9 @@ namespace SchoolManagement.API.Services
 
         public async Task<bool> DeleteGradeAsync(int id, int userId)
         {
-            string userRole = await _userService.GetUserRole(userId);
+            UserRole userRole = await _userService.GetUserRole(userId);
 
-            if (userRole != "Admin")
+            if (userRole != UserRole.Admin)
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
