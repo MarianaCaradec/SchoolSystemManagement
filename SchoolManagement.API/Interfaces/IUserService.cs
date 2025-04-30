@@ -1,4 +1,5 @@
 ﻿using SchoolManagement.API.Models;
+using static SchoolManagement.API.Models.User;
 
 namespace SchoolManagement.API.Interfaces
 {
@@ -6,8 +7,8 @@ namespace SchoolManagement.API.Interfaces
     {
         public Task<IEnumerable<User>> GetUsersAsync(int userId);
         public Task<User> GetUserByEmailAsync(string email, int userId);
-        public Task<string> GetUserRole(int id);
-        public Task<User> CreateUserAsync(User userToBeCreated);
+        public Task<UserRole> GetUserRole(int id);
+        public Task<User> CreateUserAsync(User userToBeCreated, int userId);
         public Task<User> UpdateUserAsync(int id, User userToBeUpdated, int userId);
         public Task<bool> DeleteUserAsync(int id, int userId);
         //public Task<bool> AuthenticateAsync(string email, string password);
