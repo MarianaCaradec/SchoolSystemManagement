@@ -132,8 +132,14 @@ namespace SchoolManagement.API.Services
 
             if (userRole != UserRole.Admin)
             {
-                user.Email = userToBeUpdated.Email;
-                user.Password = userToBeUpdated.Password;
+                if(id != userId)
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to do this action.");
+                } else
+                {
+                    user.Email = userToBeUpdated.Email;
+                    user.Password = userToBeUpdated.Password;
+                }
             }
             else
             {
