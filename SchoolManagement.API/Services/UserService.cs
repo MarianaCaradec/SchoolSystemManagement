@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using SchoolManagement.API.Data.Context;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
@@ -6,9 +7,10 @@ using static SchoolManagement.API.Models.User;
 
 namespace SchoolManagement.API.Services
 {
-    public class UserService(SchoolSysDBContext context) : IUserService
+    public class UserService(SchoolSysDBContext context, IPasswordHasher<User> passwordHasher) : IUserService
     {
         private readonly SchoolSysDBContext _context = context;
+        private readonly IPasswordHasher<User> _passwordHasher = passwordHasher;
 
         public async Task<IEnumerable<User>> GetUsersAsync(int userId)
         {
@@ -67,23 +69,31 @@ namespace SchoolManagement.API.Services
             return user.Role;
         }
 
+        private string HashPassword(string password)
+        {
+            return _passwordHasher.HashPassword(null, password);
+        }
+
         public async Task<User> CreateUserAsync(User userToBeCreated, int userId)
         {
             UserRole creatorRole = await GetUserRole(userId);
 
-            if(userToBeCreated.Role == UserRole.Admin && creatorRole != UserRole.Admin)
-            {
-                throw new UnauthorizedAccessException("Only Admin users can assign the Admin role to an user");
-            }
 
-            if(userToBeCreated.Role == UserRole.Teacher && creatorRole != UserRole.Admin)
-            {
-                throw new UnauthorizedAccessException("Only Admin users can assign the Teacher role to an user");
-            }
-
-            if(creatorRole == null)
+            if (creatorRole == null)
             {
                 userToBeCreated.Role = UserRole.Student;
+            }
+            else
+            {
+                if(creatorRole == UserRole.Student)
+                {
+                    throw new UnauthorizedAccessException("Students are not authorized to create an user.");
+                }
+
+                if ((userToBeCreated.Role == UserRole.Admin || userToBeCreated.Role == UserRole.Teacher) && creatorRole != UserRole.Admin)
+                {
+                    throw new UnauthorizedAccessException($"Only Admin users can assign {userToBeCreated.Role} role.");
+                }
             }
 
             if (!Enum.TryParse(userToBeCreated.Role.ToString(), true, out UserRole inputRole))
@@ -91,10 +101,12 @@ namespace SchoolManagement.API.Services
                 throw new ArgumentException($"Invalid role '{userToBeCreated.Role}'. Allowed roles are: Admin and Teacher for an Admin user, or Student for anyone.");
             }
 
+            string hashedPassword = HashPassword(userToBeCreated.Password);
+
             User createdUser = new User
             {
                 Email = userToBeCreated.Email,
-                Password = userToBeCreated.Password,
+                Password = hashedPassword,
                 Role = inputRole
             };
 
@@ -155,13 +167,15 @@ namespace SchoolManagement.API.Services
             return true;
         }
 
-        //public async Task<bool> AuthenticateAsync(string email, string password)
-        //{
-        //    var user = await GetUserByEmailAsync(email);
-        //    if (user == null) return false;
+        public async Task<bool> AuthenticateAsync(string email, string password, int userId)
+        {
+            var user = await GetUserByEmailAsync(email, userId);
 
-        //    // Example password checking (consider hashing!)
-        //    return user.Password == password;
-        //}
+            if (user == null) return false;
+
+            var result = _passwordHasher.VerifyHashedPassword(user, user.Password, password);
+
+            return result == PasswordVerificationResult.Success;
+        }
     }
 }

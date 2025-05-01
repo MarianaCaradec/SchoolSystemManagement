@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SchoolManagement.API.Data.Context;
 using SchoolManagement.API.Interfaces;
+using SchoolManagement.API.Models;
 using SchoolManagement.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +14,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITeacherService, TeacherService>();
 builder.Services.AddScoped<IAttendanceService, AttendanceService>();
