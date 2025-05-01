@@ -437,43 +437,50 @@ namespace SchoolManagement.API.Migrations
                         {
                             Id = 1,
                             Email = "pepitoaurelio@test.com",
-                            Password = "hashedpassword645",
+                            Password = "AQAAAAIAAYagAAAAECTy8XNV0Qf9VZov/kVVku3Q8YpKVneS21Pb/8uX9U8w1QIGL1bHdwVUXyD3jK94ag==",
                             Role = 2
                         },
                         new
                         {
                             Id = 2,
                             Email = "martamaria@test.com",
-                            Password = "hashedpassword547",
+                            Password = "AQAAAAIAAYagAAAAEAmsKL+Kr2sj1WkX7wE6EsasNBDSqpqY/UIEcl5y/ZdVwftjoajZdi9pxlOTyHF5kA==",
                             Role = 2
                         },
                         new
                         {
                             Id = 3,
                             Email = "rosalopez@test.com",
-                            Password = "hashedpassword687",
+                            Password = "AQAAAAIAAYagAAAAEOBpYhpaG7rXPY8THwCTCntqeslorpm5S3xRxp56Dh1pw2LYJIZvllfJ61bDaf/LCA==",
                             Role = 2
                         },
                         new
                         {
                             Id = 4,
                             Email = "roberto@test.com",
-                            Password = "hashedpassword79889",
+                            Password = "AQAAAAIAAYagAAAAEJqjDnxXMTxDBnXhebyC8L4WP2Qt1kkotv0KofmJNW3+WxTGRnRA1cqrX98fIgIyLQ==",
                             Role = 1
                         },
                         new
                         {
                             Id = 5,
                             Email = "tatamartino@test.com",
-                            Password = "hashedpassword98347",
+                            Password = "AQAAAAIAAYagAAAAEP5p57ij2wqgnXecMVrb0IbtDCJJZttmNeaFgLdRk0wiGZKxLr8lFpfBYRolWZGvdA==",
                             Role = 1
                         },
                         new
                         {
                             Id = 6,
                             Email = "roccototo@test.com",
-                            Password = "hashedpassword8437",
+                            Password = "AQAAAAIAAYagAAAAEBomj87vvotEl8qSFB9gdVd1XHbESfQep3y6NpxDnWGNH96S3fmlyQBchhQGRE74Sg==",
                             Role = 1
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Email = "admin@gmail.com",
+                            Password = "AQAAAAIAAYagAAAAEAchPH+EsaxDcv9PVIsvonynIW7yT7IDzFsvdgUIUGv4ecuXZafDu3orOjn3lsVUgA==",
+                            Role = 0
                         });
                 });
 
