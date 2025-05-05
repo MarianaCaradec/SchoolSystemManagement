@@ -23,10 +23,6 @@ namespace SchoolManagement.API.Services
                query = query.Where(a => a.StudentId == userId);
 
             }
-            else
-            {
-               query = query.Include(a => a.Teacher);
-            }
 
             return await query.Select(a => new Attendance
             {
