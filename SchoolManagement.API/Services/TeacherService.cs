@@ -25,12 +25,6 @@ namespace SchoolManagement.API.Services
                 .Include(t => t.Subjects)
                 .Include(t => t.Classes);
 
-            if (userRole == UserRole.Admin)
-            {
-                query = query.Include(t => t.Attendances);
-                
-            }
-
             return await query.Select(t => new Teacher
             {
                 Id = t.Id,
@@ -60,17 +54,24 @@ namespace SchoolManagement.API.Services
                 .Include(t => t.Subjects)
                 .Include(t => t.Classes);
 
-            if (userRole == UserRole.Admin)
-            {
-                query = query.Include(t => t.Attendances);
-            }
-
             if (userRole == UserRole.Teacher && id != userId)
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
 
-            Teacher teacher = await query.FirstOrDefaultAsync(t => t.Id == id);
+            Teacher teacher = await query.Select(t => new Teacher
+            {
+                Id = t.Id,
+                Name = t.Name,
+                Surname = t.Surname,
+                BirthDate = t.BirthDate,
+                Address = t.Address,
+                MobileNumber = t.MobileNumber,
+                User = t.User,
+                Subjects = t.Subjects.ToList(),
+                Classes = t.Classes.ToList(),
+                Attendances = userRole == UserRole.Admin ? t.Attendances.ToList() : null,
+            }).FirstOrDefaultAsync(t => t.Id == id);
 
             if (teacher == null) throw new KeyNotFoundException($"Teacher with ID {id} not found.");
 
