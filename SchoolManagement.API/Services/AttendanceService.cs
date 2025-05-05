@@ -40,12 +40,14 @@ namespace SchoolManagement.API.Services
 
             IQueryable<Attendance> query = _context.Attendances.Include(a => a.Student);
 
-            if (userRole != UserRole.Student)
+            Attendance attendance = await query.Select(a => new Attendance
             {
-                query = query.Include(a => a.Teacher);
-            }
-
-            Attendance attendance = await query.FirstOrDefaultAsync(a => a.Id == id);
+                Id = a.Id,
+                Date = a.Date,
+                Present = a.Present,
+                Student = a.Student,
+                Teacher = userRole != UserRole.Student ? a.Teacher : null,
+            }).FirstOrDefaultAsync(a => a.Id == id);
 
             if (attendance == null)
             {
