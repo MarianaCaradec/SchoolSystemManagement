@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using SchoolManagement.API.Data.Context;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
@@ -6,23 +7,16 @@ using static SchoolManagement.API.Models.User;
 
 namespace SchoolManagement.API.Services
 {
-    public class UserService(SchoolSysDBContext context) : IUserService
+    public class UserService(SchoolSysDBContext context, IPasswordHasher<User> passwordHasher) : IUserService
     {
         private readonly SchoolSysDBContext _context = context;
+        private readonly IPasswordHasher<User> _passwordHasher = passwordHasher;
 
         public async Task<IEnumerable<User>> GetUsersAsync(int userId)
         {
             UserRole userRole = await GetUserRole(userId);
 
-            IQueryable<User> query = _context.Users.Include(u => u.Email).Include(u => u.Role);
-
-            if(userRole == UserRole.Admin)
-            {
-                query = query
-                    .Include(u => u.Password)
-                    .Include(u => u.Teacher)
-                    .Include(u => u.Student);
-            }
+            IQueryable<User> query = _context.Users;
 
             return await query.Select(u => new User
             {
@@ -38,19 +32,23 @@ namespace SchoolManagement.API.Services
         {
             UserRole userRole = await GetUserRole(userId);
 
-            IQueryable<User> query = _context.Users.Include(u => u.Email).Include(u => u.Role);
+            IQueryable<User> query = _context.Users;
 
-            if(userRole == UserRole.Admin)
+            User user = await query.Select(u => new User
             {
-                query = query
-                    .Include(u => u.Password)
-                    .Include(u => u.Teacher)
-                    .Include(u => u.Student);
-            }
-
-            User user = await query.FirstOrDefaultAsync(u => u.Email == email);
+                Email = u.Email,
+                Role = u.Role,
+                Password = userRole == UserRole.Admin ? u.Password : null,
+                Teacher = userRole == UserRole.Admin ? u.Teacher : null,
+                Student = userRole == UserRole.Admin ? u.Student : null
+            }).FirstOrDefaultAsync(u => u.Email == email);
 
             if (user == null) throw new KeyNotFoundException($"User with email {email} not found.");
+
+            if (userRole != UserRole.Admin && userId != user.Id)
+            {
+                throw new UnauthorizedAccessException("You are not authorized to view this user.");
+            }
 
             return user;
         }
@@ -67,23 +65,34 @@ namespace SchoolManagement.API.Services
             return user.Role;
         }
 
+        private string HashPassword(string password)
+        {
+            return _passwordHasher.HashPassword(null, password);
+        }
+
         public async Task<User> CreateUserAsync(User userToBeCreated, int userId)
         {
             UserRole creatorRole = await GetUserRole(userId);
 
-            if(userToBeCreated.Role == UserRole.Admin && creatorRole != UserRole.Admin)
-            {
-                throw new UnauthorizedAccessException("Only Admin users can assign the Admin role to an user");
-            }
 
-            if(userToBeCreated.Role == UserRole.Teacher && creatorRole != UserRole.Admin)
+            if (creatorRole == null)
             {
-                throw new UnauthorizedAccessException("Only Admin users can assign the Teacher role to an user");
+                if (userToBeCreated.Role != UserRole.Student)
+                {
+                    throw new UnauthorizedAccessException("Only student accounts can be created without authentication.");
+                }
             }
-
-            if(creatorRole == null)
+            else
             {
-                userToBeCreated.Role = UserRole.Student;
+                if(creatorRole == UserRole.Student)
+                {
+                    throw new UnauthorizedAccessException("Students are not authorized to create an user.");
+                }
+
+                if ((userToBeCreated.Role == UserRole.Admin || userToBeCreated.Role == UserRole.Teacher) && creatorRole != UserRole.Admin)
+                {
+                    throw new UnauthorizedAccessException($"Only Admin users can assign {userToBeCreated.Role} role.");
+                }
             }
 
             if (!Enum.TryParse(userToBeCreated.Role.ToString(), true, out UserRole inputRole))
@@ -91,10 +100,12 @@ namespace SchoolManagement.API.Services
                 throw new ArgumentException($"Invalid role '{userToBeCreated.Role}'. Allowed roles are: Admin and Teacher for an Admin user, or Student for anyone.");
             }
 
+            string hashedPassword = HashPassword(userToBeCreated.Password);
+
             User createdUser = new User
             {
                 Email = userToBeCreated.Email,
-                Password = userToBeCreated.Password,
+                Password = hashedPassword,
                 Role = inputRole
             };
 
@@ -118,16 +129,29 @@ namespace SchoolManagement.API.Services
 
             if (user == null) throw new KeyNotFoundException($"User with ID {id} not found");
 
+            if (!Enum.TryParse(userToBeUpdated.Role.ToString(), true, out UserRole inputRole))
+            {
+                throw new ArgumentException($"Invalid role '{userToBeUpdated.Role}'. Allowed roles are: Admin and Teacher for an Admin user, or Student for anyone.");
+            }
+
+            string hashedPassword = HashPassword(userToBeUpdated.Password);
+
             if (userRole != UserRole.Admin)
             {
-                user.Email = userToBeUpdated.Email;
-                user.Password = userToBeUpdated.Password;
+                if(id != userId)
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to do this action.");
+                } else
+                {
+                    user.Email = userToBeUpdated.Email;
+                    user.Password = hashedPassword;
+                }
             }
             else
             {
                 user.Email = userToBeUpdated.Email;
                 user.Password = userToBeUpdated.Password;
-                user.Role = userToBeUpdated.Role;
+                user.Role = inputRole;
             }
 
             _context.Update(user);   
@@ -155,13 +179,15 @@ namespace SchoolManagement.API.Services
             return true;
         }
 
-        //public async Task<bool> AuthenticateAsync(string email, string password)
-        //{
-        //    var user = await GetUserByEmailAsync(email);
-        //    if (user == null) return false;
+        public async Task<bool> AuthenticateAsync(string email, string password, int userId)
+        {
+            var user = await GetUserByEmailAsync(email, userId);
 
-        //    // Example password checking (consider hashing!)
-        //    return user.Password == password;
-        //}
+            if (user == null) return false;
+
+            var result = _passwordHasher.VerifyHashedPassword(user, user.Password, password);
+
+            return result == PasswordVerificationResult.Success;
+        }
     }
 }

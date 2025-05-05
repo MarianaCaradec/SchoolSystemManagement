@@ -12,8 +12,8 @@ using SchoolManagement.API.Data.Context;
 namespace SchoolManagement.API.Migrations
 {
     [DbContext(typeof(SchoolSysDBContext))]
-    [Migration("20250422210321_AttendanceSeedsAdded")]
-    partial class AttendanceSeedsAdded
+    [Migration("20250501192135_FirstMigration2")]
+    partial class FirstMigration2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,49 +25,36 @@ namespace SchoolManagement.API.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("AttendanceStudent", b =>
-                {
-                    b.Property<int>("AttendancesId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("StudentsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AttendancesId", "StudentsId");
-
-                    b.HasIndex("StudentsId");
-
-                    b.ToTable("AttendanceStudent");
-                });
-
-            modelBuilder.Entity("AttendanceTeacher", b =>
-                {
-                    b.Property<int>("AttendancesId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TeachersId")
-                        .HasColumnType("int");
-
-                    b.HasKey("AttendancesId", "TeachersId");
-
-                    b.HasIndex("TeachersId");
-
-                    b.ToTable("AttendanceTeacher");
-                });
-
             modelBuilder.Entity("ClassTeacher", b =>
                 {
-                    b.Property<int>("ClassesId")
+                    b.Property<int>("ClassId")
                         .HasColumnType("int");
 
-                    b.Property<int>("TeachersId")
+                    b.Property<int>("TeacherId")
                         .HasColumnType("int");
 
-                    b.HasKey("ClassesId", "TeachersId");
+                    b.HasKey("ClassId", "TeacherId");
 
-                    b.HasIndex("TeachersId");
+                    b.HasIndex("TeacherId");
 
                     b.ToTable("ClassTeacher");
+
+                    b.HasData(
+                        new
+                        {
+                            ClassId = 1,
+                            TeacherId = 1
+                        },
+                        new
+                        {
+                            ClassId = 2,
+                            TeacherId = 2
+                        },
+                        new
+                        {
+                            ClassId = 3,
+                            TeacherId = 3
+                        });
                 });
 
             modelBuilder.Entity("SchoolManagement.API.Models.Attendance", b =>
@@ -84,7 +71,17 @@ namespace SchoolManagement.API.Migrations
                     b.Property<bool>("Present")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("StudentId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("TeacherId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("TeacherId");
 
                     b.ToTable("Attendances");
 
@@ -93,19 +90,43 @@ namespace SchoolManagement.API.Migrations
                         {
                             Id = 1,
                             Date = new DateOnly(2025, 4, 22),
-                            Present = true
+                            Present = true,
+                            StudentId = 1
                         },
                         new
                         {
                             Id = 2,
                             Date = new DateOnly(2025, 4, 21),
-                            Present = false
+                            Present = false,
+                            StudentId = 2
                         },
                         new
                         {
                             Id = 3,
                             Date = new DateOnly(2025, 4, 20),
-                            Present = true
+                            Present = true,
+                            StudentId = 3
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Date = new DateOnly(2025, 2, 20),
+                            Present = true,
+                            TeacherId = 1
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Date = new DateOnly(2025, 4, 14),
+                            Present = false,
+                            TeacherId = 2
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Date = new DateOnly(2025, 1, 9),
+                            Present = true,
+                            TeacherId = 3
                         });
                 });
 
@@ -183,6 +204,32 @@ namespace SchoolManagement.API.Migrations
                     b.HasIndex("SubjectId");
 
                     b.ToTable("Grades");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Date = new DateOnly(2025, 4, 22),
+                            StudentId = 1,
+                            SubjectId = 1,
+                            Value = 85
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Date = new DateOnly(2025, 4, 20),
+                            StudentId = 2,
+                            SubjectId = 2,
+                            Value = 90
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Date = new DateOnly(2025, 4, 18),
+                            StudentId = 3,
+                            SubjectId = 3,
+                            Value = 75
+                        });
                 });
 
             modelBuilder.Entity("SchoolManagement.API.Models.Student", b =>
@@ -203,10 +250,6 @@ namespace SchoolManagement.API.Migrations
                     b.Property<int>("ClassId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<long>("MobileNumber")
                         .HasColumnType("bigint");
 
@@ -214,17 +257,19 @@ namespace SchoolManagement.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Surname")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ClassId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Students");
 
@@ -235,11 +280,10 @@ namespace SchoolManagement.API.Migrations
                             Address = "123 Calle Falsa, Paraná",
                             BirthDate = new DateOnly(2005, 6, 15),
                             ClassId = 1,
-                            Email = "sofia.perez@example.com",
                             MobileNumber = 5493415123456L,
                             Name = "Sofía",
-                            Password = "hashedpassword1",
-                            Surname = "Pérez"
+                            Surname = "Pérez",
+                            UserId = 1
                         },
                         new
                         {
@@ -247,11 +291,10 @@ namespace SchoolManagement.API.Migrations
                             Address = "456 Avenida Siempre Viva, Paraná",
                             BirthDate = new DateOnly(2006, 10, 22),
                             ClassId = 2,
-                            Email = "lucas.ramirez@example.com",
                             MobileNumber = 5493415234567L,
                             Name = "Lucas",
-                            Password = "hashedpassword2",
-                            Surname = "Ramírez"
+                            Surname = "Ramírez",
+                            UserId = 2
                         },
                         new
                         {
@@ -259,11 +302,10 @@ namespace SchoolManagement.API.Migrations
                             Address = "789 Boulevard Independencia, Paraná",
                             BirthDate = new DateOnly(2004, 3, 8),
                             ClassId = 3,
-                            Email = "camila.gonzalez@example.com",
                             MobileNumber = 5493415345678L,
                             Name = "Camila",
-                            Password = "hashedpassword3",
-                            Surname = "González"
+                            Surname = "González",
+                            UserId = 3
                         });
                 });
 
@@ -316,10 +358,6 @@ namespace SchoolManagement.API.Migrations
                     b.Property<DateOnly>("BirthDate")
                         .HasColumnType("date");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<long>("MobileNumber")
                         .HasColumnType("bigint");
 
@@ -327,15 +365,17 @@ namespace SchoolManagement.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Surname")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("Teachers");
 
@@ -345,94 +385,168 @@ namespace SchoolManagement.API.Migrations
                             Id = 1,
                             Address = "123 Calle Falsa, Buenos Aires",
                             BirthDate = new DateOnly(2000, 5, 20),
-                            Email = "juan.gonzalez@example.com",
                             MobileNumber = 541112345678L,
                             Name = "Juan",
-                            Password = "hashedpassword1",
-                            Surname = "González"
+                            Surname = "González",
+                            UserId = 4
                         },
                         new
                         {
                             Id = 2,
                             Address = "456 Avenida Siempre Viva, Córdoba",
                             BirthDate = new DateOnly(2001, 8, 15),
-                            Email = "maria.fernandez@example.com",
                             MobileNumber = 541198765432L,
                             Name = "María",
-                            Password = "hashedpassword2",
-                            Surname = "Fernández"
+                            Surname = "Fernández",
+                            UserId = 5
                         },
                         new
                         {
                             Id = 3,
                             Address = "789 Boulevard Independencia, Mendoza",
                             BirthDate = new DateOnly(1999, 12, 10),
-                            Email = "carlos.martinez@example.com",
                             MobileNumber = 541165432987L,
                             Name = "Carlos",
-                            Password = "hashedpassword3",
-                            Surname = "Martínez"
+                            Surname = "Martínez",
+                            UserId = 6
+                        });
+                });
+
+            modelBuilder.Entity("SchoolManagement.API.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Email = "pepitoaurelio@test.com",
+                            Password = "AQAAAAIAAYagAAAAECTy8XNV0Qf9VZov/kVVku3Q8YpKVneS21Pb/8uX9U8w1QIGL1bHdwVUXyD3jK94ag==",
+                            Role = 2
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Email = "martamaria@test.com",
+                            Password = "AQAAAAIAAYagAAAAEAmsKL+Kr2sj1WkX7wE6EsasNBDSqpqY/UIEcl5y/ZdVwftjoajZdi9pxlOTyHF5kA==",
+                            Role = 2
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Email = "rosalopez@test.com",
+                            Password = "AQAAAAIAAYagAAAAEOBpYhpaG7rXPY8THwCTCntqeslorpm5S3xRxp56Dh1pw2LYJIZvllfJ61bDaf/LCA==",
+                            Role = 2
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Email = "roberto@test.com",
+                            Password = "AQAAAAIAAYagAAAAEJqjDnxXMTxDBnXhebyC8L4WP2Qt1kkotv0KofmJNW3+WxTGRnRA1cqrX98fIgIyLQ==",
+                            Role = 1
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Email = "tatamartino@test.com",
+                            Password = "AQAAAAIAAYagAAAAEP5p57ij2wqgnXecMVrb0IbtDCJJZttmNeaFgLdRk0wiGZKxLr8lFpfBYRolWZGvdA==",
+                            Role = 1
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Email = "roccototo@test.com",
+                            Password = "AQAAAAIAAYagAAAAEBomj87vvotEl8qSFB9gdVd1XHbESfQep3y6NpxDnWGNH96S3fmlyQBchhQGRE74Sg==",
+                            Role = 1
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Email = "admin@gmail.com",
+                            Password = "AQAAAAIAAYagAAAAEAchPH+EsaxDcv9PVIsvonynIW7yT7IDzFsvdgUIUGv4ecuXZafDu3orOjn3lsVUgA==",
+                            Role = 0
                         });
                 });
 
             modelBuilder.Entity("SubjectTeacher", b =>
                 {
-                    b.Property<int>("SubjectsId")
+                    b.Property<int>("SubjectId")
                         .HasColumnType("int");
 
-                    b.Property<int>("TeachersId")
+                    b.Property<int>("TeacherId")
                         .HasColumnType("int");
 
-                    b.HasKey("SubjectsId", "TeachersId");
+                    b.HasKey("SubjectId", "TeacherId");
 
-                    b.HasIndex("TeachersId");
+                    b.HasIndex("TeacherId");
 
                     b.ToTable("SubjectTeacher");
-                });
 
-            modelBuilder.Entity("AttendanceStudent", b =>
-                {
-                    b.HasOne("SchoolManagement.API.Models.Attendance", null)
-                        .WithMany()
-                        .HasForeignKey("AttendancesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SchoolManagement.API.Models.Student", null)
-                        .WithMany()
-                        .HasForeignKey("StudentsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("AttendanceTeacher", b =>
-                {
-                    b.HasOne("SchoolManagement.API.Models.Attendance", null)
-                        .WithMany()
-                        .HasForeignKey("AttendancesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SchoolManagement.API.Models.Teacher", null)
-                        .WithMany()
-                        .HasForeignKey("TeachersId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasData(
+                        new
+                        {
+                            SubjectId = 3,
+                            TeacherId = 1
+                        },
+                        new
+                        {
+                            SubjectId = 2,
+                            TeacherId = 2
+                        },
+                        new
+                        {
+                            SubjectId = 1,
+                            TeacherId = 3
+                        });
                 });
 
             modelBuilder.Entity("ClassTeacher", b =>
                 {
                     b.HasOne("SchoolManagement.API.Models.Class", null)
                         .WithMany()
-                        .HasForeignKey("ClassesId")
+                        .HasForeignKey("ClassId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("SchoolManagement.API.Models.Teacher", null)
                         .WithMany()
-                        .HasForeignKey("TeachersId")
+                        .HasForeignKey("TeacherId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("SchoolManagement.API.Models.Attendance", b =>
+                {
+                    b.HasOne("SchoolManagement.API.Models.Student", "Student")
+                        .WithMany("Attendances")
+                        .HasForeignKey("StudentId");
+
+                    b.HasOne("SchoolManagement.API.Models.Teacher", "Teacher")
+                        .WithMany("Attendances")
+                        .HasForeignKey("TeacherId");
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("SchoolManagement.API.Models.Grade", b =>
@@ -462,20 +576,39 @@ namespace SchoolManagement.API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SchoolManagement.API.Models.User", "User")
+                        .WithOne("Student")
+                        .HasForeignKey("SchoolManagement.API.Models.Student", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Class");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("SchoolManagement.API.Models.Teacher", b =>
+                {
+                    b.HasOne("SchoolManagement.API.Models.User", "User")
+                        .WithOne("Teacher")
+                        .HasForeignKey("SchoolManagement.API.Models.Teacher", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("SubjectTeacher", b =>
                 {
                     b.HasOne("SchoolManagement.API.Models.Subject", null)
                         .WithMany()
-                        .HasForeignKey("SubjectsId")
+                        .HasForeignKey("SubjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("SchoolManagement.API.Models.Teacher", null)
                         .WithMany()
-                        .HasForeignKey("TeachersId")
+                        .HasForeignKey("TeacherId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -487,12 +620,26 @@ namespace SchoolManagement.API.Migrations
 
             modelBuilder.Entity("SchoolManagement.API.Models.Student", b =>
                 {
+                    b.Navigation("Attendances");
+
                     b.Navigation("Grades");
                 });
 
             modelBuilder.Entity("SchoolManagement.API.Models.Subject", b =>
                 {
                     b.Navigation("Grades");
+                });
+
+            modelBuilder.Entity("SchoolManagement.API.Models.Teacher", b =>
+                {
+                    b.Navigation("Attendances");
+                });
+
+            modelBuilder.Entity("SchoolManagement.API.Models.User", b =>
+                {
+                    b.Navigation("Student");
+
+                    b.Navigation("Teacher");
                 });
 #pragma warning restore 612, 618
         }
