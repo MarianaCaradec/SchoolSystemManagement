@@ -16,15 +16,7 @@ namespace SchoolManagement.API.Services
         {
             UserRole userRole = await GetUserRole(userId);
 
-            IQueryable<User> query = _context.Users.Include(u => u.Email).Include(u => u.Role);
-
-            if(userRole == UserRole.Admin)
-            {
-                query = query
-                    .Include(u => u.Password)
-                    .Include(u => u.Teacher)
-                    .Include(u => u.Student);
-            }
+            IQueryable<User> query = _context.Users;
 
             return await query.Select(u => new User
             {
@@ -40,19 +32,23 @@ namespace SchoolManagement.API.Services
         {
             UserRole userRole = await GetUserRole(userId);
 
-            IQueryable<User> query = _context.Users.Include(u => u.Email).Include(u => u.Role);
+            IQueryable<User> query = _context.Users;
 
-            if(userRole == UserRole.Admin)
+            User user = await query.Select(u => new User
             {
-                query = query
-                    .Include(u => u.Password)
-                    .Include(u => u.Teacher)
-                    .Include(u => u.Student);
-            }
-
-            User user = await query.FirstOrDefaultAsync(u => u.Email == email);
+                Email = u.Email,
+                Role = u.Role,
+                Password = userRole == UserRole.Admin ? u.Password : null,
+                Teacher = userRole == UserRole.Admin ? u.Teacher : null,
+                Student = userRole == UserRole.Admin ? u.Student : null
+            }).FirstOrDefaultAsync(u => u.Email == email);
 
             if (user == null) throw new KeyNotFoundException($"User with email {email} not found.");
+
+            if (userRole != UserRole.Admin && userId != user.Id)
+            {
+                throw new UnauthorizedAccessException("You are not authorized to view this user.");
+            }
 
             return user;
         }
@@ -81,7 +77,10 @@ namespace SchoolManagement.API.Services
 
             if (creatorRole == null)
             {
-                userToBeCreated.Role = UserRole.Student;
+                if (userToBeCreated.Role != UserRole.Student)
+                {
+                    throw new UnauthorizedAccessException("Only student accounts can be created without authentication.");
+                }
             }
             else
             {
@@ -130,6 +129,13 @@ namespace SchoolManagement.API.Services
 
             if (user == null) throw new KeyNotFoundException($"User with ID {id} not found");
 
+            if (!Enum.TryParse(userToBeUpdated.Role.ToString(), true, out UserRole inputRole))
+            {
+                throw new ArgumentException($"Invalid role '{userToBeUpdated.Role}'. Allowed roles are: Admin and Teacher for an Admin user, or Student for anyone.");
+            }
+
+            string hashedPassword = HashPassword(userToBeUpdated.Password);
+
             if (userRole != UserRole.Admin)
             {
                 if(id != userId)
@@ -138,14 +144,14 @@ namespace SchoolManagement.API.Services
                 } else
                 {
                     user.Email = userToBeUpdated.Email;
-                    user.Password = userToBeUpdated.Password;
+                    user.Password = hashedPassword;
                 }
             }
             else
             {
                 user.Email = userToBeUpdated.Email;
                 user.Password = userToBeUpdated.Password;
-                user.Role = userToBeUpdated.Role;
+                user.Role = inputRole;
             }
 
             _context.Update(user);   
