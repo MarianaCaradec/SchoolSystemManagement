@@ -178,16 +178,5 @@ namespace SchoolManagement.API.Services
             
             return true;
         }
-
-        public async Task<bool> AuthenticateAsync(string email, string password, int userId)
-        {
-            var user = await GetUserByEmailAsync(email, userId);
-
-            if (user == null) return false;
-
-            var result = _passwordHasher.VerifyHashedPassword(user, user.Password, password);
-
-            return result == PasswordVerificationResult.Success;
-        }
     }
 }
