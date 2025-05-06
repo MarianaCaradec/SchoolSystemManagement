@@ -11,6 +11,5 @@ namespace SchoolManagement.API.Interfaces
         public Task<User> CreateUserAsync(User userToBeCreated, int userId);
         public Task<User> UpdateUserAsync(int id, User userToBeUpdated, int userId);
         public Task<bool> DeleteUserAsync(int id, int userId);
-        public Task<bool> AuthenticateAsync(string email, string password, int userId);
     }
 }
