@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SchoolManagement.API.Data.Context;
+using SchoolManagement.API.DTOs;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
 using static SchoolManagement.API.Models.User;
@@ -12,33 +13,31 @@ namespace SchoolManagement.API.Services
         private readonly SchoolSysDBContext _context = context;
         private readonly IPasswordHasher<User> _passwordHasher = passwordHasher;
 
-        public async Task<IEnumerable<User>> GetUsersAsync(int userId)
+        public async Task<IEnumerable<UserDto>> GetUsersAsync(int userId)
         {
             UserRole userRole = await GetUserRole(userId);
 
             IQueryable<User> query = _context.Users;
 
-            return await query.Select(u => new User
+            return await query.Select(u => new UserDto
             {
                 Email = u.Email,
-                Password = userRole == UserRole.Admin ? u.Password : null,
                 Role = u.Role,
                 Teacher = userRole == UserRole.Admin ? u.Teacher : null,
                 Student = userRole == UserRole.Admin ? u.Student : null,
             }).ToListAsync(); ;
         }
 
-        public async Task<User> GetUserByEmailAsync(string email, int userId)
+        public async Task<UserDto> GetUserByEmailAsync(string email, int userId)
         {
             UserRole userRole = await GetUserRole(userId);
 
             IQueryable<User> query = _context.Users;
 
-            User user = await query.Select(u => new User
+            UserDto user = await query.Select(u => new UserDto
             {
                 Email = u.Email,
                 Role = u.Role,
-                Password = userRole == UserRole.Admin ? u.Password : null,
                 Teacher = userRole == UserRole.Admin ? u.Teacher : null,
                 Student = userRole == UserRole.Admin ? u.Student : null
             }).FirstOrDefaultAsync(u => u.Email == email);
@@ -70,7 +69,7 @@ namespace SchoolManagement.API.Services
             return _passwordHasher.HashPassword(null, password);
         }
 
-        public async Task<User> CreateUserAsync(User userToBeCreated, int userId)
+        public async Task<UserDto> CreateUserAsync(User userToBeCreated, int userId)
         {
             UserRole creatorRole = await GetUserRole(userId);
 
@@ -112,10 +111,14 @@ namespace SchoolManagement.API.Services
             _context.Users.Add(createdUser);
             await _context.SaveChangesAsync();
 
-            return createdUser;
+            return new UserDto
+            {
+                Email = createdUser.Email,
+                Role = createdUser.Role,
+            };
         }
 
-        public async Task<User> UpdateUserAsync(int id, User userToBeUpdated, int userId)
+        public async Task<UserDto> UpdateUserAsync(int id, User userToBeUpdated, int userId)
         {
             UserRole userRole = await GetUserRole(userId);
 
@@ -157,7 +160,11 @@ namespace SchoolManagement.API.Services
             _context.Update(user);   
             await _context.SaveChangesAsync();
 
-            return user;
+            return new UserDto
+            {
+                Email = user.Email,
+                Role = user.Role,
+            };
         }
 
         public async Task<bool> DeleteUserAsync(int id, int userId)
