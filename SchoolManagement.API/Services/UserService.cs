@@ -17,15 +17,30 @@ namespace SchoolManagement.API.Services
         {
             UserRole userRole = await GetUserRole(userId);
 
-            IQueryable<User> query = _context.Users;
+            IQueryable<User> query = _context.Users
+                .Include(u => u.Teacher)
+                .Include(u => u.Student)
+                .ThenInclude(s => s.Class)
+                .ThenInclude(c => c.Teachers);
 
             return await query.Select(u => new UserDto
             {
+                Id = u.Id,
                 Email = u.Email,
                 Role = u.Role,
-                Teacher = userRole == UserRole.Admin ? u.Teacher : null,
-                Student = userRole == UserRole.Admin ? u.Student : null,
-            }).ToListAsync(); ;
+                Teacher = userRole == UserRole.Admin && u.Teacher != null ? new TeacherDto
+                {
+                    Id = u.Teacher.Id,
+                    Name = u.Teacher.Name,
+                    Surname = u.Teacher.Surname
+                } : null,
+                Student = userRole == UserRole.Admin && u.Student != null ? new StudentDto
+                {
+                    Id = u.Student.Id,
+                    Name = u.Student.Name,
+                    Surname = u.Student.Surname
+                } : null,
+            }).ToListAsync();
         }
 
         public async Task<UserDto> GetUserByEmailAsync(string email, int userId)
@@ -39,8 +54,18 @@ namespace SchoolManagement.API.Services
                 Id = u.Id,
                 Email = u.Email,
                 Role = u.Role,
-                Teacher = userRole == UserRole.Admin ? u.Teacher : null,
-                Student = userRole == UserRole.Admin ? u.Student : null
+                Teacher = userRole == UserRole.Admin && u.Teacher != null ? new TeacherDto
+                {
+                    Id = u.Teacher.Id,
+                    Name = u.Teacher.Name,
+                    Surname = u.Teacher.Surname
+            } : null,
+                Student = userRole == UserRole.Admin && u.Student != null ? new StudentDto
+                {
+                    Id = u.Student.Id,
+                    Name = u.Student.Name,
+                    Surname = u.Student.Surname
+                } : null
             }).FirstOrDefaultAsync(u => u.Email == email);
 
             if (user == null) throw new KeyNotFoundException($"User with email {email} not found.");
