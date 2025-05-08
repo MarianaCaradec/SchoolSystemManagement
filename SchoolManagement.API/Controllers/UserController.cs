@@ -37,7 +37,7 @@ namespace SchoolManagement.API.Controllers
             return Ok(user);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("user-role")]
         public async Task<ActionResult<UserRole>> GetUserRole(int id)
         {
             UserRole userRole = await _userService.GetUserRole(id);
