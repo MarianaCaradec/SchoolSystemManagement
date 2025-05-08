@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SchoolManagement.API.DTOs;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
 using static SchoolManagement.API.Models.User;
@@ -16,9 +17,9 @@ namespace SchoolManagement.API.Controllers
 
         // GET: api/<UserController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetAllUsers(int userId)
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetAllUsers(int userId)
         {
-            IEnumerable<User> users = await _userService.GetUsersAsync(userId);
+            IEnumerable<UserDto> users = await _userService.GetUsersAsync(userId);
 
             if (users == null || !users.Any()) return NoContent();
 
@@ -27,9 +28,9 @@ namespace SchoolManagement.API.Controllers
 
         // GET api/<UserController>/5
         [HttpGet("{email}")]
-        public async Task<ActionResult<User>> GetUser(string email, int userId)
+        public async Task<ActionResult<UserDto>> GetUser(string email, int userId)
         {
-            User user = await _userService.GetUserByEmailAsync(email, userId);
+            UserDto user = await _userService.GetUserByEmailAsync(email, userId);
 
             if (user == null) return NotFound($"User with the email {email} not found.");
 
@@ -46,18 +47,18 @@ namespace SchoolManagement.API.Controllers
 
         // POST api/<UserController>
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User userToBeCreated, int userId)
+        public async Task<ActionResult<UserDto>> PostUser(User userToBeCreated, int userId)
         {
-            User createdUser = await _userService.CreateUserAsync(userToBeCreated, userId);
+            UserDto createdUser = await _userService.CreateUserAsync(userToBeCreated, userId);
 
             return CreatedAtAction("GetUser", new { email = createdUser.Email}, createdUser);
         }
 
         // PUT api/<UserController>/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<User>> PutUser(int id, User userToBeUpdated, int userId)
+        public async Task<ActionResult<UserDto>> PutUser(int id, User userToBeUpdated, int userId)
         {
-            User updatedUser = await _userService.UpdateUserAsync(id, userToBeUpdated, userId);
+            UserDto updatedUser = await _userService.UpdateUserAsync(id, userToBeUpdated, userId);
 
             return Ok(updatedUser);
         }
