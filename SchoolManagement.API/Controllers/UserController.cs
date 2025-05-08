@@ -47,7 +47,7 @@ namespace SchoolManagement.API.Controllers
 
         // POST api/<UserController>
         [HttpPost]
-        public async Task<ActionResult<UserDto>> PostUser(User userToBeCreated, int userId)
+        public async Task<ActionResult<UserDto>> PostUser(UserInputDto userToBeCreated, int userId)
         {
             UserDto createdUser = await _userService.CreateUserAsync(userToBeCreated, userId);
 
@@ -56,7 +56,7 @@ namespace SchoolManagement.API.Controllers
 
         // PUT api/<UserController>/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<UserDto>> PutUser(int id, User userToBeUpdated, int userId)
+        public async Task<ActionResult<UserDto>> PutUser(int id, UserInputDto userToBeUpdated, int userId)
         {
             UserDto updatedUser = await _userService.UpdateUserAsync(id, userToBeUpdated, userId);
 

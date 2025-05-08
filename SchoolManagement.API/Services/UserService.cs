@@ -95,7 +95,7 @@ namespace SchoolManagement.API.Services
             return _passwordHasher.HashPassword(null, password);
         }
 
-        public async Task<UserDto> CreateUserAsync(User userToBeCreated, int userId)
+        public async Task<UserDto> CreateUserAsync(UserInputDto userToBeCreated, int userId)
         {
             UserRole creatorRole = await GetUserRole(userId);
 
@@ -139,12 +139,13 @@ namespace SchoolManagement.API.Services
 
             return new UserDto
             {
+                Id = createdUser.Id,
                 Email = createdUser.Email,
                 Role = createdUser.Role,
             };
         }
 
-        public async Task<UserDto> UpdateUserAsync(int id, User userToBeUpdated, int userId)
+        public async Task<UserDto> UpdateUserAsync(int id, UserInputDto userToBeUpdated, int userId)
         {
             UserRole userRole = await GetUserRole(userId);
 
@@ -188,6 +189,7 @@ namespace SchoolManagement.API.Services
 
             return new UserDto
             {
+                Id = user.Id,
                 Email = user.Email,
                 Role = user.Role,
             };
