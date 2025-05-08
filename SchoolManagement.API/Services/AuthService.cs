@@ -12,12 +12,11 @@ using static SchoolManagement.API.Models.User;
 
 namespace SchoolManagement.API.Services
 {
-    public class AuthService(IConfiguration configuration, SchoolSysDBContext context, IAuthService authService, 
-        IPasswordHasher<User> passwordHasher, IUserService userService)
+    public class AuthService(IConfiguration configuration, SchoolSysDBContext context, 
+        IPasswordHasher<User> passwordHasher, IUserService userService) : IAuthService
     {
         private readonly IConfiguration _configuration = configuration;
         private readonly SchoolSysDBContext _context = context;
-        private readonly IAuthService _authService = authService;
         private readonly IPasswordHasher<User> _passwordHasher = passwordHasher;
         private readonly IUserService _userService = userService;
 
