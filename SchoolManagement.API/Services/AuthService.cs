@@ -61,7 +61,7 @@ namespace SchoolManagement.API.Services
             return await GenerateTokenAsync(user);
         }
        
-        public async Task<UserDto> RegisterAsync (Auth authUser, int userId)
+        public async Task<UserDto> RegisterAsync (Auth authUser, int? userId)
         {
             bool existingUser = await _context.Users.AnyAsync(u => u.Email == authUser.Email);
 
@@ -78,15 +78,20 @@ namespace SchoolManagement.API.Services
                     $" Allowed roles are: Admin and Teacher for an Admin user, or Student for anyone.");
             }
 
-            UserRole creatorRole = await _userService.GetUserRole(userId);
+            UserRole creatorRole = UserRole.Student;
 
-            if (creatorRole == null)
+            if (userId.HasValue && userId > 0)
             {
-                inputRole = UserRole.Student;
+                creatorRole = await _userService.GetUserRole(userId.Value);
             }
-            else if (creatorRole == UserRole.Admin)
+            
+            if (creatorRole == UserRole.Admin)
             {
                 inputRole = authUser.Role;
+            }
+            else if (creatorRole == UserRole.Teacher || creatorRole == UserRole.Student)
+            {
+                inputRole = UserRole.Student;
             }
             else
             {
