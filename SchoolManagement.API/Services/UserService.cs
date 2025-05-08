@@ -36,6 +36,7 @@ namespace SchoolManagement.API.Services
 
             UserDto user = await query.Select(u => new UserDto
             {
+                Id = u.Id,
                 Email = u.Email,
                 Role = u.Role,
                 Teacher = userRole == UserRole.Admin ? u.Teacher : null,
@@ -44,7 +45,7 @@ namespace SchoolManagement.API.Services
 
             if (user == null) throw new KeyNotFoundException($"User with email {email} not found.");
 
-            if (userRole != UserRole.Admin && userId != user.Id)
+            if (userRole != UserRole.Admin && userId != user?.Id)
             {
                 throw new UnauthorizedAccessException("You are not authorized to view this user.");
             }
