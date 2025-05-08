@@ -95,37 +95,35 @@ namespace SchoolManagement.API.Services
             return _passwordHasher.HashPassword(null, password);
         }
 
-        public async Task<UserDto> CreateUserAsync(UserInputDto userToBeCreated, int userId)
-        {
-            UserRole creatorRole = await GetUserRole(userId);
-
-
-            if (creatorRole == null)
-            {
-                if (userToBeCreated.Role != UserRole.Student)
-                {
-                    throw new UnauthorizedAccessException("Only student accounts can be created without authentication.");
-                }
-            }
-            else
-            {
-                if(creatorRole == UserRole.Student)
-                {
-                    throw new UnauthorizedAccessException("Students are not authorized to create an user.");
-                }
-
-                if ((userToBeCreated.Role == UserRole.Admin || userToBeCreated.Role == UserRole.Teacher) && creatorRole != UserRole.Admin)
-                {
-                    throw new UnauthorizedAccessException($"Only Admin users can assign {userToBeCreated.Role} role.");
-                }
-            }
+        public async Task<UserDto> CreateUserAsync(UserInputDto userToBeCreated, int? userId)
+        { 
+            string hashedPassword = HashPassword(userToBeCreated.Password);
 
             if (!Enum.TryParse(userToBeCreated.Role.ToString(), true, out UserRole inputRole))
             {
                 throw new ArgumentException($"Invalid role '{userToBeCreated.Role}'. Allowed roles are: Admin and Teacher for an Admin user, or Student for anyone.");
             }
 
-            string hashedPassword = HashPassword(userToBeCreated.Password);
+            UserRole creatorRole = UserRole.Student;
+
+            if (userId.HasValue && userId > 0)
+            {
+                creatorRole = await GetUserRole(userId.Value);
+            }
+
+            if (creatorRole == UserRole.Admin)
+            {
+                inputRole = userToBeCreated.Role;
+            }
+            else if (creatorRole == UserRole.Teacher || creatorRole == UserRole.Student)
+            {
+                inputRole = UserRole.Student;
+            }
+            else
+            {
+                throw new UnauthorizedAccessException($"Only Admin users can assign {userToBeCreated.Role} role.");
+            }
+
 
             User createdUser = new User
             {
@@ -150,11 +148,6 @@ namespace SchoolManagement.API.Services
             UserRole userRole = await GetUserRole(userId);
 
             User user = await _context.Users
-                .Include(u => u.Email)
-                .Include(u => u.Password)
-                .Include(u => u.Role)
-                .Include(u => u.Teacher)
-                .Include(u => u.Student)
                 .FirstOrDefaultAsync(u => u.Id == id);
 
             if (user == null) throw new KeyNotFoundException($"User with ID {id} not found");
