@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SchoolManagement.API.DTOs;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
 
@@ -14,9 +15,9 @@ namespace SchoolManagement.API.Controllers
 
         // GET: api/<ValuesController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Teacher>>> GetAllTeachers(int userId)
+        public async Task<ActionResult<IEnumerable<TeacherDto>>> GetAllTeachers(int userId)
         {
-            IEnumerable<Teacher> teachers = await _teacherService.GetTeachersAsync(userId);
+            IEnumerable<TeacherDto> teachers = await _teacherService.GetTeachersAsync(userId);
 
             if (teachers == null || !teachers.Any()) return NoContent();
 
@@ -25,18 +26,18 @@ namespace SchoolManagement.API.Controllers
 
         // GET api/<ValuesController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Teacher>> GetTeacher(int id, int userId)
+        public async Task<ActionResult<TeacherDto>> GetTeacher(int id, int userId)
         {
-            Teacher teacher = await _teacherService.GetTeacherByIdAsync(id, userId);
+            TeacherDto teacher = await _teacherService.GetTeacherByIdAsync(id, userId);
 
             return Ok(teacher);
         }
 
         // POST api/<ValuesController>
         [HttpPost]
-        public async Task<ActionResult<Teacher>> PostTeacher(Teacher teacherToBeCreated, int userId)
+        public async Task<ActionResult<TeacherInputDto>> PostTeacher(TeacherInputDto teacherToBeCreated, int userId)
         {
-            Teacher createdTeacher = await _teacherService.CreateTeacherAsync(teacherToBeCreated, userId);
+            TeacherInputDto createdTeacher = await _teacherService.CreateTeacherAsync(teacherToBeCreated, userId);
 
             return CreatedAtAction("GetTeacher", new { id = createdTeacher.Id }, createdTeacher);
         }
