@@ -13,6 +13,7 @@ namespace SchoolManagement.API.Controllers
     {
         private readonly ITeacherService _teacherService = teacherService;
 
+
         // GET: api/<ValuesController>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TeacherDto>>> GetAllTeachers(int userId)
