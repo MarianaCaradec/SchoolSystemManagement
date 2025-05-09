@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SchoolManagement.API.Data.Context;
+using SchoolManagement.API.DTOs;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
 using static SchoolManagement.API.Models.User;
@@ -11,7 +12,7 @@ namespace SchoolManagement.API.Services
         private readonly SchoolSysDBContext _context = context;
         private readonly IUserService _userService = userService;
 
-        public async Task<IEnumerable<Teacher>> GetTeachersAsync(int userId)
+        public async Task<IEnumerable<TeacherDto>> GetTeachersAsync(int userId)
         {
             UserRole userRole = await _userService.GetUserRole(userId);
 
@@ -21,26 +22,51 @@ namespace SchoolManagement.API.Services
             }
 
             IQueryable<Teacher> query = _context.Teachers
-                .Include(t => t.User)
                 .Include(t => t.Subjects)
-                .Include(t => t.Classes);
+                .Include(t => t.Classes)
+                .ThenInclude(c => c.Students)
+                .Include(t => t.Attendances);
 
-            return await query.Select(t => new Teacher
+            return await query.Select(t => new TeacherDto
             {
                 Id = t.Id,
                 Name = t.Name,
                 Surname = t.Surname,
-                BirthDate = t.BirthDate,
-                Address = t.Address,
                 MobileNumber = t.MobileNumber,
-                User = t.User,
-                Subjects = t.Subjects.ToList(),
-                Classes = t.Classes.ToList(),
-                Attendances = userRole == UserRole.Admin ? t.Attendances.ToList() : null,
-            }).ToListAsync(); ;
+                UserId = t.UserId,
+                Subjects = t.Subjects != null ?
+                t.Subjects.Select(s => new SubjectDto
+                {
+                    Id = s.Id,
+                    Title = s.Title
+                }).ToList() : new List<SubjectDto>(),
+                Classes = t.Classes != null ?
+                t.Classes.Select(c => new ClassDto
+                {
+                    Id = c.Id,
+                    Course = c.Course,
+                    Divition = c.Divition,
+                    Students = userRole == UserRole.Teacher && t.Id == userId || userRole == UserRole.Admin ? 
+                    c.Students.Select(st => new StudentDto
+                    {
+                        Id = st.Id,
+                        Name = st.Name,
+                        Surname = st.Surname,
+                    }).ToList() : null
+                }).ToList() : new List<ClassDto>(),
+                Attendances = userRole == UserRole.Admin ?
+                t.Attendances != null ?
+                t.Attendances.Select(a => new AttendanceDto
+                {
+                    Id = a.Id,
+                    Date = a.Date,
+                    Present = a.Present
+                }).ToList() : new List<AttendanceDto>()
+                : null
+            }).ToListAsync();
         }
 
-        public async Task<Teacher> GetTeacherByIdAsync(int id, int userId)
+        public async Task<TeacherDto> GetTeacherByIdAsync(int id, int userId)
         {
             UserRole userRole = await _userService.GetUserRole(userId);
 
@@ -50,27 +76,52 @@ namespace SchoolManagement.API.Services
             }
 
             IQueryable<Teacher> query = _context.Teachers
-                .Include(t => t.User)
                 .Include(t => t.Subjects)
-                .Include(t => t.Classes);
+                .Include(t => t.Classes)
+                .ThenInclude(c => c.Students)
+                .Include(t => t.Attendances);
 
             if (userRole == UserRole.Teacher && id != userId)
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
 
-            Teacher teacher = await query.Select(t => new Teacher
+            TeacherDto teacher = await query.Select(t => new TeacherDto
             {
                 Id = t.Id,
                 Name = t.Name,
                 Surname = t.Surname,
-                BirthDate = t.BirthDate,
-                Address = t.Address,
                 MobileNumber = t.MobileNumber,
-                User = t.User,
-                Subjects = t.Subjects.ToList(),
-                Classes = t.Classes.ToList(),
-                Attendances = userRole == UserRole.Admin ? t.Attendances.ToList() : null,
+                UserId = t.UserId,
+                Subjects = t.Subjects != null ?
+                t.Subjects.Select(s => new SubjectDto
+                {
+                    Id = s.Id,
+                    Title = s.Title
+                }).ToList() : new List<SubjectDto>(),
+                Classes = t.Classes != null ?
+                t.Classes.Select(c => new ClassDto
+                {
+                    Id = c.Id,
+                    Course = c.Course,
+                    Divition = c.Divition,
+                    Students = userRole == UserRole.Teacher && t.Id == userId || userRole == UserRole.Admin ? 
+                    c.Students.Select(st => new StudentDto
+                    {
+                        Id = st.Id,
+                        Name = st.Name,
+                        Surname = st.Surname,
+                    }).ToList() : null
+                }).ToList() : new List<ClassDto>(),
+                Attendances = userRole == UserRole.Teacher && t.Id == userId || userRole == UserRole.Admin ?
+                t.Attendances != null ?
+                t.Attendances.Select(a => new AttendanceDto
+                {
+                    Id = a.Id,
+                    Date = a.Date,
+                    Present = a.Present
+                }).ToList() : new List<AttendanceDto>()
+                : null
             }).FirstOrDefaultAsync(t => t.Id == id);
 
             if (teacher == null) throw new KeyNotFoundException($"Teacher with ID {id} not found.");
@@ -78,7 +129,7 @@ namespace SchoolManagement.API.Services
             return teacher;
         }
 
-        public async Task<Teacher> CreateTeacherAsync(Teacher teacherToBeCreated, int userId)
+        public async Task<TeacherInputDto> CreateTeacherAsync(TeacherInputDto teacherToBeCreated, int userId)
         {
             UserRole userRole = await _userService.GetUserRole(userId);
 
@@ -87,7 +138,7 @@ namespace SchoolManagement.API.Services
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
 
-            Teacher createdTeacher = new Teacher
+            Teacher createdTeacherToBeSaved = new Teacher
             {
                 Name = teacherToBeCreated.Name,
                 Surname = teacherToBeCreated.Surname,
@@ -97,8 +148,18 @@ namespace SchoolManagement.API.Services
                 UserId = teacherToBeCreated.UserId,
             };
 
-            _context.Add(createdTeacher);
+            _context.Add(createdTeacherToBeSaved);
             await _context.SaveChangesAsync();
+
+            TeacherInputDto createdTeacher = new TeacherInputDto
+            {
+                Name = teacherToBeCreated.Name,
+                Surname = teacherToBeCreated.Surname,
+                BirthDate = teacherToBeCreated.BirthDate,
+                Address = teacherToBeCreated.Address,
+                MobileNumber = teacherToBeCreated.MobileNumber,
+                UserId = teacherToBeCreated.UserId,
+            };
 
             return createdTeacher;
         }
