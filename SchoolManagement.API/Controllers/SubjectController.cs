@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SchoolManagement.API.DTOs;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
 
@@ -14,9 +15,9 @@ namespace SchoolManagement.API.Controllers
 
         // GET: api/<SubjectController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Subject>>> GetAllSubjects(int userId)
+        public async Task<ActionResult<IEnumerable<SubjectResponseDto>>> GetAllSubjects(int userId)
         {
-            IEnumerable<Subject> subjects = await _subjectService.GetSubjectsAsync(userId);
+            IEnumerable<SubjectResponseDto> subjects = await _subjectService.GetSubjectsAsync(userId);
 
             if (subjects == null || !subjects.Any()) return NoContent();
 
