@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SchoolManagement.API.Data.Context;
+using SchoolManagement.API.DTOs;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
 using static SchoolManagement.API.Models.User;
@@ -11,7 +12,7 @@ namespace SchoolManagement.API.Services
         private readonly SchoolSysDBContext _context = context;
         private readonly IUserService _userService = userService;
 
-        public async Task<IEnumerable<Subject>> GetSubjectsAsync(int userId)
+        public async Task<IEnumerable<SubjectResponseDto>> GetSubjectsAsync(int userId)
         {
             UserRole userRole = await _userService.GetUserRole(userId);
 
@@ -19,7 +20,7 @@ namespace SchoolManagement.API.Services
 
             if(userRole == UserRole.Teacher)
             {
-                query = query.Where(sub => sub.Teachers.Any(t => t.Id == userId));
+                query = query.Where(sub => sub.Teachers.Any(t => t.UserId == userId));
             }
             
             if(userRole == UserRole.Student)
@@ -28,13 +29,26 @@ namespace SchoolManagement.API.Services
                 .Where(sub => sub.Grades.Any(g => g.StudentId == userId));
             }
 
-            return await query.Select(sub => new Subject
+            return await query.Select(sub => new SubjectResponseDto
             {
                 Id = sub.Id,
                 Title = sub.Title,
-                Teachers = sub.Teachers.ToList(),
-                Grades = userRole == UserRole.Student ? sub.Grades.ToList() : null,
-            }).ToListAsync(); ;
+                Teachers = sub.Teachers.Select(t => new TeacherResponseDto 
+                { 
+                    Id = t.Id, 
+                    Name = t.Name, 
+                    Surname = t.Surname, 
+                    MobileNumber = t.MobileNumber 
+                }).ToList(),
+                Grades = userRole == UserRole.Admin || userRole == UserRole.Student ? 
+                sub.Grades.Select(g => new Grade
+                {
+                    Id = g.Id,
+                    Value = g.Value,
+                    Date = g.Date
+                }).ToList() 
+                : null,
+            }).ToListAsync();
         }
 
         public async Task<Subject> GetSubjectByIdAsync(int id, int userId)
