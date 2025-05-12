@@ -26,9 +26,9 @@ namespace SchoolManagement.API.Controllers
 
         // GET api/<SubjectController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Subject>> GetSubject(int id, int userId)
+        public async Task<ActionResult<SubjectResponseDto>> GetSubject(int id, int userId)
         {
-            Subject subject = await _subjectService.GetSubjectByIdAsync(id, userId);
+            SubjectResponseDto subject = await _subjectService.GetSubjectByIdAsync(id, userId);
 
             return Ok(subject);
         }
