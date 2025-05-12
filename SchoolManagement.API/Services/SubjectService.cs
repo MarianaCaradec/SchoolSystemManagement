@@ -110,7 +110,7 @@ namespace SchoolManagement.API.Services
             return subject;
         }
 
-        public async Task<Subject> CreateSubjectAsync(Subject subjectToBeCreated, int userId)
+        public async Task<SubjectInputDto> CreateSubjectAsync(SubjectInputDto subjectToBeCreated, int userId)
         {
             UserRole userRole = await _userService.GetUserRole(userId);
 
@@ -119,20 +119,53 @@ namespace SchoolManagement.API.Services
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
 
-            Subject createdSubject = new Subject
+            Subject createdSubjectToBeSaved = new Subject
             {
                 Title = subjectToBeCreated.Title,
-                Teachers = subjectToBeCreated.Teachers,
-                Grades = subjectToBeCreated?.Grades
+                Teachers = subjectToBeCreated.Teachers?.Select(t => new Teacher
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    Surname = t.Surname,
+                    MobileNumber = t.MobileNumber
+                }).ToList(),
+                Grades = subjectToBeCreated.Grades?.Select(g => new Grade
+                {
+                    Id = g.Id,
+                    Value = g.Value,
+                    Date = g.Date,
+                    StudentId = g.StudentId
+                }).ToList()
             };
 
-            _context.Subjects.Add(createdSubject);
+            _context.Subjects.Add(createdSubjectToBeSaved);
             await _context.SaveChangesAsync();
+
+            SubjectInputDto createdSubject = new SubjectInputDto
+            {
+                Id = createdSubjectToBeSaved.Id,
+                Title = createdSubjectToBeSaved.Title,
+                Teachers = createdSubjectToBeSaved.Teachers?.Select(t => new TeacherResponseDto
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    Surname = t.Surname,
+                    MobileNumber = t.MobileNumber
+                }).ToList(),
+                Grades = createdSubjectToBeSaved.Grades?.Select(g => new GradeDto
+                {
+                    Id = g.Id,
+                    Value = g.Value,
+                    Date = g.Date,
+                    StudentId = g.StudentId,
+                    SubjectId = g.SubjectId
+                }).ToList()
+            };
 
             return createdSubject;
         }
 
-        public async Task<Subject> UpdateSubjectAsync(int id, Subject subjectToBeUpdated, int userId)
+        public async Task<SubjectInputDto> UpdateSubjectAsync(int id, SubjectInputDto subjectToBeUpdated, int userId)
         {
             UserRole userRole = await _userService.GetUserRole(userId);
 
@@ -147,15 +180,50 @@ namespace SchoolManagement.API.Services
                 .FirstOrDefaultAsync(sub => sub.Id == id);
 
             if (subject == null) throw new KeyNotFoundException($"Subject with ID {id} not found.");
-            
+
             subject.Title = subjectToBeUpdated.Title;
-            subject.Teachers = subjectToBeUpdated.Teachers;
-            subject.Grades = subjectToBeUpdated.Grades;
-            
-            _context.Subjects.Update(subject);
+            subject.Teachers = subjectToBeUpdated.Teachers?.Select(t => new Teacher
+            {
+                Id = t.Id,
+                Name = t.Name,
+                Surname = t.Surname,
+                MobileNumber = t.MobileNumber,
+                Address = t.Address,
+                UserId = t.UserId
+            }).ToList();
+            subject.Grades = subject.Grades?.Select(g => new Grade
+            {
+                Id = g.Id,
+                Value = g.Value,
+                Date = g.Date,
+                StudentId = g.StudentId,
+                SubjectId = g.SubjectId
+            }).ToList();
+
+            _context.Update(subject);
             await _context.SaveChangesAsync();
 
-            return subject;
+            return new SubjectInputDto
+            {
+                Title = subject.Title,
+                Teachers = subject.Teachers.Select(t => new TeacherResponseDto
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    Surname = t.Surname,
+                    MobileNumber = t.MobileNumber,
+                    Address = t.Address,
+                    UserId = t.UserId
+                }).ToList(),
+                Grades = subject.Grades.Select(g => new GradeDto
+                {
+                    Id = g.Id,
+                    Value = g.Value,
+                    Date = g.Date,
+                    StudentId = g.StudentId,
+                    SubjectId = g.SubjectId
+                }).ToList()
+            };
         }
 
         public async Task<bool> DeleteSubjectAsync(int id, int userId)
