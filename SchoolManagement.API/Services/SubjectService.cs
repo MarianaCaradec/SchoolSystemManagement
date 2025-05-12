@@ -18,15 +18,26 @@ namespace SchoolManagement.API.Services
 
             IQueryable<Subject> query = _context.Subjects.Include(sub => sub.Teachers);
 
-            if(userRole == UserRole.Teacher)
+            if (userRole == UserRole.Teacher)
             {
-                query = query.Where(sub => sub.Teachers.Any(t => t.UserId == userId));
+                bool isTeacherAssociated = await _context.Subjects
+                    .Where(sub => sub.Teachers.Any(t => t.UserId == userId))
+                    .AnyAsync();
+
+                if (!isTeacherAssociated)
+                {
+                    throw new UnauthorizedAccessException("Sorry, you are not a teacher of this subject.");
+                }
+                else
+                {
+                    query = query.Where(sub => sub.Teachers.Any(t => t.UserId == userId));
+                }
             }
-            
-            if(userRole == UserRole.Student)
+
+            if (userRole == UserRole.Student)
             {
                 query = query.Include(sub => sub.Grades)
-                .Where(sub => sub.Grades.Any(g => g.StudentId == userId));
+                .Where(sub => sub.Grades.Any(g => g.Student.UserId == userId));
             }
 
             return await query.Select(sub => new SubjectResponseDto
@@ -51,7 +62,7 @@ namespace SchoolManagement.API.Services
             }).ToListAsync();
         }
 
-        public async Task<Subject> GetSubjectByIdAsync(int id, int userId)
+        public async Task<SubjectResponseDto> GetSubjectByIdAsync(int id, int userId)
         {
             UserRole userRole = await _userService.GetUserRole(userId);
 
@@ -59,15 +70,40 @@ namespace SchoolManagement.API.Services
 
             if (userRole == UserRole.Teacher)
             {
-                query = query.Where(sub => sub.Teachers.Any(t => t.Id == userId));
-            }
-            
-            if (userRole == UserRole.Student)
-            {
-                query = query.Include(sub => sub.Grades).Where(sub => sub.Grades.Any(g => g.StudentId == userId));
+                bool isTeacherAssociated = await _context.Subjects
+                    .Where(sub => sub.Id == id && sub.Teachers.Any(t => t.UserId == userId))
+                    .AnyAsync();
+
+                if (!isTeacherAssociated)
+                {
+                    throw new UnauthorizedAccessException("Sorry, you are not a teacher of this subject.");
+                } else
+                {
+                    query = query.Where(sub => sub.Teachers.Any(t => t.UserId == userId));
+                }
             }
 
-            Subject subject = await query.FirstOrDefaultAsync(sub => sub.Id == id);
+            SubjectResponseDto subject = await query.Select(sub => new SubjectResponseDto
+            {
+                Id = sub.Id,
+                Title = sub.Title,
+                Teachers = sub.Teachers.Select(t => new TeacherResponseDto
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    Surname = t.Surname,
+                    MobileNumber = t.MobileNumber
+                }).ToList(),
+                Grades = userRole == UserRole.Admin || (userRole == UserRole.Student &&
+                  query.Where(sub => sub.Grades.Any(g => g.Student.UserId == userId)).Any()) ?
+                sub.Grades.Select(g => new Grade
+                {
+                    Id = g.Id,
+                    Value = g.Value,
+                    Date = g.Date
+                }).ToList()
+                : null,
+            }).FirstOrDefaultAsync(sub => sub.Id == id);
 
             if (subject == null) throw new KeyNotFoundException($"Subject with ID {id} not found.");
             
