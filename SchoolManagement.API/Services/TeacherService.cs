@@ -203,7 +203,7 @@ namespace SchoolManagement.API.Services
             teacher.BirthDate = teacherToBeUpdated.BirthDate;
             teacher.Address = teacherToBeUpdated.Address;
             teacher.MobileNumber = teacherToBeUpdated.MobileNumber;
-        teacher.UserId = teacherToBeUpdated.UserId;
+            teacher.UserId = teacherToBeUpdated.UserId;
 
             _context.Update(teacher);
             await _context.SaveChangesAsync();
