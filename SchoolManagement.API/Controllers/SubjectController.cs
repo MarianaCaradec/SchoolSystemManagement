@@ -35,18 +35,18 @@ namespace SchoolManagement.API.Controllers
 
         // POST api/<SubjectController>
         [HttpPost]
-        public async Task<ActionResult<Subject>> PostSubject(Subject subjectToBeCreated, int userId)
+        public async Task<ActionResult<SubjectInputDto>> PostSubject(SubjectInputDto subjectToBeCreated, int userId)
         {
-            Subject createdSubject = await _subjectService.CreateSubjectAsync(subjectToBeCreated, userId);
+            SubjectInputDto createdSubject = await _subjectService.CreateSubjectAsync(subjectToBeCreated, userId);
 
             return CreatedAtAction("GetSubject", new { id = createdSubject.Id }, createdSubject);
         }
 
         // PUT api/<SubjectController>/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<Subject>> PutSubject(int id, Subject subjectToBeUpdated, int userId)
+        public async Task<ActionResult<SubjectInputDto>> PutSubject(int id, [FromBody] SubjectInputDto subjectToBeUpdated, int userId)
         {
-            Subject updatedSubject = await _subjectService.UpdateSubjectAsync(id, subjectToBeUpdated, userId);
+            SubjectInputDto updatedSubject = await _subjectService.UpdateSubjectAsync(id, subjectToBeUpdated, userId);
             
             return Ok(updatedSubject);
         }
