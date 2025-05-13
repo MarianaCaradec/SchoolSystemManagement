@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SchoolManagement.API.DTOs;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
 
@@ -14,9 +15,9 @@ namespace SchoolManagement.API.Controllers
 
         // GET: api/<StudentController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Student>>> GetAllStudents(int userId)
+        public async Task<ActionResult<IEnumerable<StudentResponseDto>>> GetAllStudents(int userId)
         {
-            IEnumerable<Student> students = await _studentService.GetStudentsAsync(userId);
+            IEnumerable<StudentResponseDto> students = await _studentService.GetStudentsAsync(userId);
 
             if (students == null || !students.Any()) return NoContent();
 
@@ -25,9 +26,9 @@ namespace SchoolManagement.API.Controllers
 
         // GET api/<StudentController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Student>> GetStudent(int id, int userId)
+        public async Task<ActionResult<StudentResponseDto>> GetStudent(int id, int userId)
         {
-            Student student = await _studentService.GetStudentByIdAsync(id, userId);
+            StudentResponseDto student = await _studentService.GetStudentByIdAsync(id, userId);
 
             return Ok(student);
         }
