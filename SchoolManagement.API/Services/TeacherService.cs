@@ -41,19 +41,19 @@ namespace SchoolManagement.API.Services
                     Title = s.Title
                 }).ToList() : new List<SubjectDto>(),
                 Classes = t.Classes != null ?
-                t.Classes.Select(c => new ClassDto
+                t.Classes.Select(c => new ClassTeacherDto
                 {
                     Id = c.Id,
                     Course = c.Course,
                     Divition = c.Divition,
                     Students = userRole == UserRole.Teacher && t.UserId == userId || userRole == UserRole.Admin ? 
-                    c.Students.Select(st => new StudentDto
+                    c.Students.Select(st => new StudentResponseDto
                     {
                         Id = st.Id,
                         Name = st.Name,
                         Surname = st.Surname,
                     }).ToList() : null
-                }).ToList() : new List<ClassDto>(),
+                }).ToList() : new List<ClassTeacherDto>(),
                 Attendances = userRole == UserRole.Teacher && t.UserId == userId || userRole == UserRole.Admin ?
                 t.Attendances != null ?
                 t.Attendances.Select(a => new AttendanceDto
@@ -95,19 +95,19 @@ namespace SchoolManagement.API.Services
                     Title = s.Title
                 }).ToList() : new List<SubjectDto>(),
                 Classes = t.Classes != null ?
-                t.Classes.Select(c => new ClassDto
+                t.Classes.Select(c => new ClassTeacherDto
                 {
                     Id = c.Id,
                     Course = c.Course,
                     Divition = c.Divition,
                     Students = userRole == UserRole.Teacher && t.UserId == userId || userRole == UserRole.Admin ? 
-                    c.Students.Select(st => new StudentDto
+                    c.Students.Select(st => new StudentResponseDto
                     {
                         Id = st.Id,
                         Name = st.Name,
                         Surname = st.Surname,
                     }).ToList() : null
-                }).ToList() : new List<ClassDto>(),
+                }).ToList() : new List<ClassTeacherDto>(),
                 Attendances = userRole == UserRole.Teacher && t.UserId == userId || userRole == UserRole.Admin ?
                 t.Attendances != null ?
                 t.Attendances.Select(a => new AttendanceDto
