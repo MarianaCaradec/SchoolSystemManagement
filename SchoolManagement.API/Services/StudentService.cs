@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SchoolManagement.API.Data.Context;
+using SchoolManagement.API.DTOs;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
 using static SchoolManagement.API.Models.User;
@@ -11,21 +12,13 @@ namespace SchoolManagement.API.Services
         private readonly SchoolSysDBContext _context = context;
         private readonly IUserService _userService = userService;
 
-        public async Task<IEnumerable<Student>> GetStudentsAsync(int userId)
+        public async Task<IEnumerable<StudentResponseDto>> GetStudentsAsync(int userId)
         {
             UserRole userRole = await _userService.GetUserRole(userId);
 
             IQueryable<Student> query = _context.Students.Include(s => s.User);
 
-            if (userRole == UserRole.Teacher)
-            {
-                query = query.Include(st => st.Class)
-                    .Include(st => st.Attendances)
-                    .Include(st => st.Grades)
-                    .Where(s => s.Class.Teachers.Any(t => t.Id == userId));
-            }
-
-            return await query.Select(st => new Student
+            return await query.Select(st => new StudentResponseDto
             {
                 Id = userRole != UserRole.Student ? st.Id : 0,
                 Name = st.Name,
@@ -33,45 +26,69 @@ namespace SchoolManagement.API.Services
                 BirthDate = st.BirthDate,
                 Address = userRole != UserRole.Student ? st.Address : "-",
                 MobileNumber = userRole != UserRole.Student ? st.MobileNumber : 0,
-                User = userRole != UserRole.Student ? 
-                new User { Email = st.User.Email, Role = st.User.Role} 
-                : new User { Email = st.User.Email },
-                Class = userRole != UserRole.Student ? st.Class : null,
-                Attendances = userRole != UserRole.Student ? st.Attendances.ToList() : null,
-                Grades = userRole != UserRole.Student ? st.Grades.ToList() : null,
             }).ToListAsync();
         }
 
-        public async Task<Student> GetStudentByIdAsync(int id, int userId)
+        public async Task<StudentResponseDto> GetStudentByIdAsync(int id, int userId)
         {
             UserRole userRole = await _userService.GetUserRole(userId);
 
-            IQueryable<Student> query = _context.Students
-                .Include(st => st.User.Email)
+            Student student = await _context.Students
+                .Include(st => st.User)
                 .Include(st => st.Class)
+                .ThenInclude(c => c.Teachers)
                 .Include(st => st.Attendances)
-                .Include(st => st.Grades);
-
-            if (userRole == UserRole.Teacher)
-            {
-                query = query.Where(st => st.Class.Teachers.Any(t => t.Id == userId));
-            }
-            
-            if(userRole == UserRole.Student)
-            {
-                if (id != userId)
-                {
-                    throw new UnauthorizedAccessException("You are not authorized to access this student.");
-                }
-
-                query = query.Where(st => st.Id == userId);
-            }
-
-            Student student = await query.FirstOrDefaultAsync(st => st.Id == id);
+                .Include(st => st.Grades)
+                .FirstOrDefaultAsync(st => st.Id == id);
 
             if (student == null) throw new KeyNotFoundException($"Student with ID {id} not found.");
 
-            return student;
+            if (userRole == UserRole.Teacher && !student.Class.Teachers.Any(t => t.UserId == userId))
+            {
+                throw new UnauthorizedAccessException("You are not authorized to access this student.");
+            }
+            
+            if(userRole == UserRole.Student && id != userId)
+            {
+                throw new UnauthorizedAccessException("You are not authorized to access this student.");
+            }
+
+            return new StudentResponseDto
+            {
+                Id = userRole != UserRole.Student ? student.Id : 0,
+                Name = student.Name,
+                Surname = student.Surname,
+                BirthDate = student.BirthDate,
+                Address = student.Address,
+                MobileNumber = student.MobileNumber,
+                EmailRole = new AuthDto { Email = student.User.Email, Role = student.User.Role },
+                Class = new ClassStudentDto 
+                { 
+                    Course = student.Class.Course, 
+                    Divition = student.Class.Divition, 
+                    Teachers = student.Class.Teachers.Select(t => new TeacherResponseDto
+                    {
+                        Name = t.Name,
+                        Surname = t.Surname,
+                        MobileNumber = userRole != UserRole.Student ? t.MobileNumber : 0,
+                        Address = userRole != UserRole.Student ? t.Address : "-",
+                        UserId = userRole != UserRole.Student ? t.UserId : 0,
+                    }).ToList()
+                    },
+                Attendances = student.Attendances.Select(a => new AttendanceDto
+                {
+                    Date = a.Date,
+                    Present = a.Present,
+                })
+                .ToList(),
+                Grades = student.Grades.Select(g => new GradeDto
+                {
+                    Value = g.Value,
+                    Date = g.Date,
+                    SubjectId = g.SubjectId,
+                })
+                .ToList(),
+            };
         }
 
         public async Task<Student> CreateStudentAsync(Student studentToBeCreated, int userId)
