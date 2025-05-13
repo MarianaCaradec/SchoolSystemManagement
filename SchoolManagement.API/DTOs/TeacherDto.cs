@@ -8,7 +8,7 @@
         public long MobileNumber { get; set; }
         public int UserId { get; set; }
         public List<SubjectDto> Subjects { get; set; } = new();
-        public List<ClassDto> Classes { get; set; } = new();
+        public List<ClassTeacherDto> Classes { get; set; } = new();
         public List<AttendanceDto> Attendances { get; set; } = new();
     }
 }
