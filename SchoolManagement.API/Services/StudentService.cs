@@ -48,7 +48,7 @@ namespace SchoolManagement.API.Services
                 throw new UnauthorizedAccessException("You are not authorized to access this student.");
             }
             
-            if(userRole == UserRole.Student && id != userId)
+            if(userRole == UserRole.Student && student.UserId != userId)
             {
                 throw new UnauthorizedAccessException("You are not authorized to access this student.");
             }
@@ -91,7 +91,7 @@ namespace SchoolManagement.API.Services
             };
         }
 
-        public async Task<Student> CreateStudentAsync(Student studentToBeCreated, int userId)
+        public async Task<StudentInputDto> CreateStudentAsync(StudentInputDto studentToBeCreated, int userId)
         {
             UserRole userRole = await _userService.GetUserRole(userId);
 
@@ -100,7 +100,7 @@ namespace SchoolManagement.API.Services
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
 
-            Student createdStudent = new Student
+            Student createdStudentToBeSaved = new Student
             {
                 Name = studentToBeCreated.Name,
                 Surname = studentToBeCreated.Surname,
@@ -111,16 +111,20 @@ namespace SchoolManagement.API.Services
                 ClassId = studentToBeCreated.ClassId
             };
 
-            if (createdStudent.Id == null || createdStudent.Id == 0)
-            {
-                Random random = new Random();
-                createdStudent.Id = random.Next(1, int.MaxValue);
-            }
-
-            _context.Students.Add(createdStudent);
+            _context.Students.Add(createdStudentToBeSaved);
             await _context.SaveChangesAsync();
 
-            return createdStudent;
+            return new StudentInputDto
+            {
+                Id = createdStudentToBeSaved.Id,
+                Name = createdStudentToBeSaved.Name,
+                Surname = createdStudentToBeSaved.Surname,
+                BirthDate = createdStudentToBeSaved.BirthDate,
+                Address = createdStudentToBeSaved.Address,
+                MobileNumber = createdStudentToBeSaved.MobileNumber,
+                UserId = createdStudentToBeSaved.UserId,
+                ClassId = createdStudentToBeSaved.ClassId
+            };
         }
 
         public async Task<Student> UpdateStudentAsync(int id, Student studentToBeUpdated, int userId)
