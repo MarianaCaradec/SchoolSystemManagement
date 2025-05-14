@@ -44,9 +44,9 @@ namespace SchoolManagement.API.Controllers
 
         // PUT api/<StudentController>/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<Student>> PutStudent(int id, Student studentToBeUpdated, int userId)
+        public async Task<ActionResult<StudentInputDto>> PutStudent(int id, StudentInputDto studentToBeUpdated, int userId)
         {
-            Student updatedStudent = await _studentService.UpdateStudentAsync(id, studentToBeUpdated, userId);
+            StudentInputDto updatedStudent = await _studentService.UpdateStudentAsync(id, studentToBeUpdated, userId);
 
             return Ok(updatedStudent);
         }
