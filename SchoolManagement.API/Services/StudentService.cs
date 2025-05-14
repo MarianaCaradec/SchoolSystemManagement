@@ -127,7 +127,7 @@ namespace SchoolManagement.API.Services
             };
         }
 
-        public async Task<Student> UpdateStudentAsync(int id, Student studentToBeUpdated, int userId)
+        public async Task<StudentInputDto> UpdateStudentAsync(int id, StudentInputDto studentToBeUpdated, int userId)
         {
             UserRole userRole = await _userService.GetUserRole(userId);
 
@@ -137,17 +137,13 @@ namespace SchoolManagement.API.Services
             }
 
             Student student = await _context.Students
-                .Include(st => st.User)
-                .Include(st => st.Class)
-                .Include(st => st.Attendances)
-                .Include(st => st.Grades)
                 .FirstOrDefaultAsync(st => st.Id == id);
 
             if (student == null) throw new KeyNotFoundException($"Student with ID {id} not found.");
 
             if(userRole == UserRole.Student)
             {
-                if(id != userId)
+                if(student.UserId != userId)
                 {
                     throw new UnauthorizedAccessException("You are not authorized to do this action.");
 
@@ -158,21 +154,30 @@ namespace SchoolManagement.API.Services
                 student.BirthDate = studentToBeUpdated.BirthDate;
                 student.Address = studentToBeUpdated.Address;
                 student.MobileNumber = studentToBeUpdated.MobileNumber;
-            } 
-
-             student.Name = studentToBeUpdated.Name;
-             student.Surname = studentToBeUpdated.Surname;
-             student.BirthDate = studentToBeUpdated.BirthDate;
-             student.Address = studentToBeUpdated.Address;
-             student.MobileNumber = studentToBeUpdated.MobileNumber;
-             student.ClassId = studentToBeUpdated.ClassId;
-             student.Attendances = studentToBeUpdated.Attendances ?? student.Attendances;
-             student.Grades = studentToBeUpdated.Grades ?? student.Grades;
+            } else
+            {
+                student.Name = studentToBeUpdated.Name;
+                student.Surname = studentToBeUpdated.Surname;
+                student.BirthDate = studentToBeUpdated.BirthDate;
+                student.Address = studentToBeUpdated.Address;
+                student.MobileNumber = studentToBeUpdated.MobileNumber;
+                student.ClassId = studentToBeUpdated.ClassId;
+                student.UserId = studentToBeUpdated.UserId;
+            }
 
             _context.Students.Update(student);
             await _context.SaveChangesAsync();
 
-            return student;
+            return new StudentInputDto
+            {
+                Name = student.Name,
+                Surname = student.Surname,
+                BirthDate = student.BirthDate,
+                Address = student.Address,
+                MobileNumber = student.MobileNumber,
+                ClassId = student.ClassId,
+                UserId = student.UserId,
+            };
         }
 
         public async Task<bool> DeleteStudentAsync(int id, int userId)
