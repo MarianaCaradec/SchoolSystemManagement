@@ -35,9 +35,9 @@ namespace SchoolManagement.API.Controllers
 
         // POST api/<StudentController>
         [HttpPost]
-        public async Task<ActionResult<Student>> PostStudent(Student studentToBeCreated, int userId)
+        public async Task<ActionResult<StudentInputDto>> PostStudent(StudentInputDto studentToBeCreated, int userId)
         {
-            Student createdStudent = await _studentService.CreateStudentAsync(studentToBeCreated, userId);
+            StudentInputDto createdStudent = await _studentService.CreateStudentAsync(studentToBeCreated, userId);
 
             return CreatedAtAction("GetStudent", new { id = createdStudent.Id }, createdStudent);
         }
