@@ -93,7 +93,7 @@ namespace SchoolManagement.API.Services
             };
         }
 
-        public async Task<Class> CreateClassAsync(Class classToBeCreated, int userId)
+        public async Task<ClassInputDto> CreateClassAsync(ClassInputDto classToBeCreated, int userId)
         {
             UserRole userRole = await _userService.GetUserRole(userId);
 
@@ -107,14 +107,22 @@ namespace SchoolManagement.API.Services
                 Course = classToBeCreated.Course,
                 Divition = classToBeCreated.Divition,
                 Capacity = classToBeCreated.Capacity,
-                Teachers = classToBeCreated.Teachers,
-                Students = classToBeCreated.Students
+                Teachers = classToBeCreated.TeacherId != 0 ? new List<Teacher> { new Teacher { Id = classToBeCreated.TeacherId } } : null,
+                Students = classToBeCreated.StudentId != 0 ? new List<Student> { new Student { Id = classToBeCreated.StudentId } } : null
             };
 
             _context.Classes.Add(createdClass);
             await _context.SaveChangesAsync();
 
-            return createdClass;
+            return new ClassInputDto
+            {
+                Id = createdClass.Id,
+                Course = createdClass.Course,
+                Divition = createdClass.Divition,
+                Capacity = createdClass.Capacity,
+                TeacherId = classToBeCreated.TeacherId,
+                StudentId = classToBeCreated.StudentId
+            };
         }
 
         public async Task<Class> UpdateClassAsync(int id, Class classToBeUpdated, int userId)
