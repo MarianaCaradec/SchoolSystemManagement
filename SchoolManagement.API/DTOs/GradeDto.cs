@@ -1,6 +1,4 @@
-﻿using SchoolManagement.API.Models;
-
-namespace SchoolManagement.API.DTOs
+﻿namespace SchoolManagement.API.DTOs
 {
     public class GradeDto
     {
