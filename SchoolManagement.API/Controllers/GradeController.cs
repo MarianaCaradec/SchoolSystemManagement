@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SchoolManagement.API.DTOs;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
 using System.Security.Cryptography.Pkcs;
@@ -15,9 +16,9 @@ namespace SchoolManagement.API.Controllers
 
         // GET: api/<GradeController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Grade>>> GetAllGrades(int userId)
+        public async Task<ActionResult<IEnumerable<GradeDto>>> GetAllGrades(int userId)
         {
-            IEnumerable<Grade> grades = await _gradeService.GetGradesAsync(userId);
+            IEnumerable<GradeDto> grades = await _gradeService.GetGradesAsync(userId);
 
             if (grades == null || !grades.Any()) return NoContent();
 
@@ -26,9 +27,9 @@ namespace SchoolManagement.API.Controllers
 
         // GET api/<GradeController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Grade>> GetGrade(int id, int userId)
+        public async Task<ActionResult<GradeResponseDto>> GetGrade(int id, int userId)
         {
-            Grade grade = await _gradeService.GetGradeByIdAsync(id, userId);
+            GradeResponseDto grade = await _gradeService.GetGradeByIdAsync(id, userId);
 
             return Ok(grade);
         }
