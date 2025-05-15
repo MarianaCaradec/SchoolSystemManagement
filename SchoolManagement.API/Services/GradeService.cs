@@ -90,30 +90,16 @@ namespace SchoolManagement.API.Services
             return grade;
         }
 
-        public async Task<Grade> CreateGradeAsync(Grade gradeToBeCreated, int userId)
+        public async Task<GradeDto> CreateGradeAsync(GradeDto gradeToBeCreated, int userId)
         {
             UserRole userRole = await _userService.GetUserRole(userId);
 
             if (userRole == UserRole.Student)
             {
-                throw new UnauthorizedAccessException("You are not authorized to do this action.");
-            }
-            //Trying eager loading for perfomance
-            Student studentWithClassAndTeachers = await _context.Students
-                    .Include(s => s.Class.Teachers)
-                    .FirstOrDefaultAsync(s => s.Id == gradeToBeCreated.StudentId);
-
-            if (studentWithClassAndTeachers == null)
-            {
-                throw new ArgumentException("Invalid student or class information.");
+                throw new UnauthorizedAccessException("You are not authorized  to do this action.");
             }
 
-            if (userRole == UserRole.Teacher && !studentWithClassAndTeachers.Class.Teachers.Any(t => t.Id == userId))
-            {
-                throw new UnauthorizedAccessException("You are not authorized to do this action.");
-            }
-
-            Grade createdGrade = new Grade
+            Grade createdGradeToBeSaved = new Grade
             {
                 Value = gradeToBeCreated.Value,
                 Date = gradeToBeCreated.Date,
@@ -121,10 +107,35 @@ namespace SchoolManagement.API.Services
                 SubjectId = gradeToBeCreated.SubjectId
             };
 
-            _context.Grades.Add(createdGrade);
+            //Trying eager loading for perfomance
+            Student studentWithClassAndTeachers = await _context.Students
+                    .Include(s => s.Class.Teachers)
+                    .ThenInclude(t => t.Subjects)
+                    .FirstOrDefaultAsync(s => s.Id == createdGradeToBeSaved.StudentId);
+
+            if (studentWithClassAndTeachers == null)
+            {
+                throw new ArgumentException("Invalid student or class information.");
+            }
+
+            if (userRole == UserRole.Teacher &&
+                !studentWithClassAndTeachers.Class.Teachers.Any(t => t.UserId == userId &&
+                t.Subjects.Any(s => s.Id == createdGradeToBeSaved.SubjectId)))
+            {
+                throw new UnauthorizedAccessException("You are not authorized to do this action.");
+            }
+
+            _context.Grades.Add(createdGradeToBeSaved);
             await _context.SaveChangesAsync();
 
-            return createdGrade;
+            return new GradeDto
+            {
+                Id = createdGradeToBeSaved.Id,
+                Value = createdGradeToBeSaved.Value,
+                Date = createdGradeToBeSaved.Date,
+                StudentId = createdGradeToBeSaved.StudentId,
+                SubjectId = createdGradeToBeSaved.SubjectId
+            };
         }
 
         public async Task<Grade> UpdateGradeAsync(int id, Grade gradeToBeUpdated, int studentId, int subjectId, int userId)
