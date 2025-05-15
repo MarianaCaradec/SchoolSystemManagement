@@ -45,10 +45,10 @@ namespace SchoolManagement.API.Controllers
 
         // PUT api/<GradeController>/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<Grade>> PutGrade(int id, Grade gradeToBeUpdated, int studentId, int subjectId, int userId)
+        public async Task<ActionResult<GradeDto>> PutGrade(int id, GradeDto gradeToBeUpdated, int userId)
         {
 
-            var updatedGrade = await _gradeService.UpdateGradeAsync(id, gradeToBeUpdated, studentId, subjectId, userId);
+            GradeDto updatedGrade = await _gradeService.UpdateGradeAsync(id, gradeToBeUpdated, userId);
 
             return Ok(updatedGrade);
 
