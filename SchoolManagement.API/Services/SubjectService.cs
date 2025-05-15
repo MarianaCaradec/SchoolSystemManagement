@@ -56,7 +56,8 @@ namespace SchoolManagement.API.Services
                 {
                     Id = g.Id,
                     Value = g.Value,
-                    Date = g.Date
+                    Date = g.Date,
+                    StudentId = g.StudentId
                 }).ToList() 
                 : null,
             }).ToListAsync();
@@ -100,7 +101,8 @@ namespace SchoolManagement.API.Services
                 {
                     Id = g.Id,
                     Value = g.Value,
-                    Date = g.Date
+                    Date = g.Date,
+                    SubjectId = g.SubjectId,
                 }).ToList()
                 : null,
             }).FirstOrDefaultAsync(sub => sub.Id == id);
