@@ -138,7 +138,7 @@ namespace SchoolManagement.API.Services
             };
         }
 
-        public async Task<Grade> UpdateGradeAsync(int id, Grade gradeToBeUpdated, int studentId, int subjectId, int userId)
+        public async Task<GradeDto> UpdateGradeAsync(int id, GradeDto gradeToBeUpdated, int userId)
         {
             UserRole userRole = await _userService.GetUserRole(userId);
 
@@ -149,6 +149,9 @@ namespace SchoolManagement.API.Services
 
             Grade grade = await _context.Grades
                 .Include(g => g.Student)
+                .ThenInclude(st => st.Class)
+                .ThenInclude(c => c.Teachers)
+                .ThenInclude(t => t.Subjects)
                 .Include(g => g.Subject)
                 .FirstOrDefaultAsync(g => g.Id == id);
 
@@ -156,7 +159,8 @@ namespace SchoolManagement.API.Services
 
             if (userRole == UserRole.Teacher)
             {
-                if(!grade.Student.Class.Teachers.Any(t => t.Id == userId))
+                if(!grade.Student.Class.Teachers.Any(t => t.UserId == userId
+                && t.Subjects.Any(s => s.Id == grade.SubjectId)))
                 {
                     throw new UnauthorizedAccessException("You are not authorized to do this action.");
 
@@ -174,13 +178,20 @@ namespace SchoolManagement.API.Services
 
             grade.Value = gradeToBeUpdated.Value;
             grade.Date = gradeToBeUpdated.Date;
-            grade.StudentId = studentId;
-            grade.SubjectId = subjectId;
+            grade.StudentId = gradeToBeUpdated.StudentId;
+            grade.SubjectId = gradeToBeUpdated.SubjectId;
 
             _context.Grades.Update(grade);
             await _context.SaveChangesAsync();
 
-            return grade;
+            return new GradeDto
+            {
+                Id = grade.Id,
+                Value = grade.Value,
+                Date = grade.Date,
+                StudentId = grade.StudentId,
+                SubjectId = grade.SubjectId
+            };
         }
 
         public async Task<bool> DeleteGradeAsync(int id, int userId)
