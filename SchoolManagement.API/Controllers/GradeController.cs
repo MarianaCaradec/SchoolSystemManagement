@@ -36,9 +36,9 @@ namespace SchoolManagement.API.Controllers
 
         // POST api/<GradeController>
         [HttpPost]
-        public async Task<ActionResult<Grade>> PostGrade(Grade gradeToBeCreated, int userId)
+        public async Task<ActionResult<GradeDto>> PostGrade(GradeDto gradeToBeCreated, int userId)
         {
-            Grade createdGrade = await _gradeService.CreateGradeAsync(gradeToBeCreated, userId);
+            GradeDto createdGrade = await _gradeService.CreateGradeAsync(gradeToBeCreated, userId);
 
             return CreatedAtAction("GetGrade", new { id = createdGrade.Id }, createdGrade);
         }
