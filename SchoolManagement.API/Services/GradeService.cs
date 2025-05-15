@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SchoolManagement.API.Data.Context;
+using SchoolManagement.API.DTOs;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static SchoolManagement.API.Models.User;
 
 namespace SchoolManagement.API.Services
@@ -11,11 +13,21 @@ namespace SchoolManagement.API.Services
         private readonly SchoolSysDBContext _context = context;
         private readonly IUserService _userService = userService;
 
-        public async Task<IEnumerable<Grade>> GetGradesAsync(int userId)
+        public async Task<IEnumerable<GradeDto>> GetGradesAsync(int userId)
         {
             UserRole userRole = await _userService.GetUserRole(userId);
 
             IQueryable<Grade> query = _context.Grades.Include(g => g.Student).Include(g => g.Subject);
+
+            if (userRole == UserRole.Teacher)
+            {
+                if (!query.Where(g => g.Subject.Teachers.Any(t => t.UserId == userId)).Any())
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to do this action.");
+                }
+
+                query = query.Where(g => g.Subject.Teachers.Any(t => t.UserId == userId));
+            }
 
             if (userRole == UserRole.Student)
             {
@@ -23,28 +35,54 @@ namespace SchoolManagement.API.Services
             }
 
             return await query
-                .Select(g => new Grade
+                .Select(g => new GradeDto
             {
                 Id = g.Id,
                 Value = g.Value,
                 Date = g.Date,
-                Student = g.Student,
-                Subject = g.Subject
+                StudentId = g.StudentId,
+                SubjectId = g.SubjectId
             }).ToListAsync(); ;
         }
 
-        public async Task<Grade> GetGradeByIdAsync(int id, int userId)
+        public async Task<GradeResponseDto> GetGradeByIdAsync(int id, int userId)
         {
             UserRole userRole = await _userService.GetUserRole(userId);
 
-            Grade grade = await _context.Grades
+            IQueryable<Grade> query = _context.Grades
                 .Include(g => g.Student)
-                .Include(g => g.Subject)
-                .FirstOrDefaultAsync(g => g.Id == id);
+                .Include(g => g.Subject);
 
-            if(grade == null) throw new KeyNotFoundException($"Grade with ID {id} not found");
+            if (userRole == UserRole.Teacher)
+            {
+                if (!query.Where(g => g.Subject.Teachers.Any(t => t.UserId == userId)).Any())
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to do this action.");
+                }
+                query = query.Where(g => g.Subject.Teachers.Any(t => t.UserId == userId));
+            }
 
-            if (userRole == UserRole.Student && grade.StudentId != userId)
+            GradeResponseDto grade = await query.Select( g => new GradeResponseDto
+            {
+                Id = g.Id,
+                Value = g.Value,
+                Date = g.Date,
+                Student = new StudentDto
+                {
+                    Id = g.Student.Id,
+                    Name = g.Student.Name,
+                    Surname = g.Student.Surname,
+                },
+                Subject = new SubjectDto
+                {
+                    Id = g.Subject.Id,
+                    Title = g.Subject.Title
+                }
+            }).FirstOrDefaultAsync(g => g.Id == id);
+
+            if (grade == null) throw new KeyNotFoundException($"Grade with ID {id} not found");
+
+            if (userRole == UserRole.Student && grade.Student.Id != userId)
             {
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
