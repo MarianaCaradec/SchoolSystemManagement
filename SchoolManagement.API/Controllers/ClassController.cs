@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SchoolManagement.API.Data.Seeds;
+using SchoolManagement.API.DTOs;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
 
@@ -18,9 +19,9 @@ namespace SchoolManagement.API.Controllers
 
         // GET: api/<ClassController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Class>>> GetAllClasses(int userId)
+        public async Task<ActionResult<IEnumerable<ClassResponseDto>>> GetAllClasses(int userId)
         {
-            IEnumerable<Class> classes = await _classService.GetClassesAsync(userId);
+            IEnumerable<ClassResponseDto> classes = await _classService.GetClassesAsync(userId);
 
             if (classes == null || !classes.Any()) return NoContent();
 
@@ -29,9 +30,9 @@ namespace SchoolManagement.API.Controllers
 
         // GET api/<ClassController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Class>> GetClass(int id, int userId)
+        public async Task<ActionResult<ClassResponseDto>> GetClass(int id, int userId)
         {
-            Class classById = await _classService.GetClassByIdAsync(id, userId);
+            ClassResponseDto classById = await _classService.GetClassByIdAsync(id, userId);
 
             return Ok(classById);
         }
