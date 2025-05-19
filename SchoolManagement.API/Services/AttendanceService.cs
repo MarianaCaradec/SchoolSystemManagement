@@ -30,37 +30,59 @@ namespace SchoolManagement.API.Services
                  Id = a.Id,
                  Date = a.Date,
                  Present = a.Present,
-                 StudentId = a.StudentId,
-                 TeacherId = userRole != UserRole.Student ? a.TeacherId : null,
+                 StudentId = a.Student != null ? a.StudentId : null,
+                 TeacherId = userRole != UserRole.Student && a.Teacher != null ? a.TeacherId : null,
             }).ToListAsync();
         }
 
-        public async Task<Attendance> GetAttendanceByIdAsync(int id, int userId)
+        public async Task<AttendanceResponseDto> GetAttendanceByIdAsync(int id, int userId)
         {
             UserRole userRole = await _userService.GetUserRole(userId);
 
-            IQueryable<Attendance> query = _context.Attendances.Include(a => a.Student);
-
-            Attendance attendance = await query.Select(a => new Attendance
-            {
-                Id = a.Id,
-                Date = a.Date,
-                Present = a.Present,
-                Student = a.Student,
-                Teacher = userRole != UserRole.Student ? a.Teacher : null,
-            }).FirstOrDefaultAsync(a => a.Id == id);
+            Attendance attendance = await _context.Attendances
+                .Include(a => a.Student)
+                .Include(a => a.Teacher)
+                .FirstOrDefaultAsync(a => a.Id == id);
 
             if (attendance == null)
             {
                 throw new KeyNotFoundException($"Attendance with ID {id} not found.");
             }
 
-            if (userRole == UserRole.Student && attendance.StudentId != userId)
+            if (userRole == UserRole.Student)
             {
-                throw new UnauthorizedAccessException("You are not authorized to do this action.");
+                if (attendance.Student == null || attendance.Student.UserId != userId)
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to do this action.");
+                }
             }
 
-            return attendance;
+            if (userRole == UserRole.Teacher)
+            {
+                if (attendance.Teacher != null && attendance.Teacher.UserId != userId)
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to do this action.");
+                }
+            }
+
+            return new AttendanceResponseDto
+            {
+                Id = attendance.Id,
+                Date = attendance.Date,
+                Present = attendance.Present,
+                Student = attendance.Student != null ? new StudentInputDto
+                {
+                    Id = attendance.Student.Id,
+                    Name = attendance.Student.Name,
+                    Surname = attendance.Student.Surname
+                } : null,
+                Teacher = userRole != UserRole.Student && attendance.Teacher != null ? new TeacherInputDto
+                {
+                    Id = attendance.Teacher.Id,
+                    Name = attendance.Teacher.Name,
+                    Surname = attendance.Teacher.Surname
+                } : null
+            };
         }
 
         public async Task<Attendance> CreateAttendanceAsync(Attendance attendanceToBeCreated, int? studentId, int? teacherId, int userId)
