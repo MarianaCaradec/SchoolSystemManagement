@@ -45,9 +45,9 @@ namespace SchoolManagement.API.Controllers
 
         // PUT api/<AttendanceController>/5
         [HttpPut("{id}")]
-        public async Task<ActionResult<Attendance>> PutAttendance(int id, Attendance attendanceToBeUpdated, int userId)
+        public async Task<ActionResult<AttendanceDto>> PutAttendance(int id, AttendanceDto attendanceToBeUpdated, int userId)
         {
-            Attendance updatedAttendance = await _attendanceService.UpdateAttendanceAsync(id, attendanceToBeUpdated, attendanceToBeUpdated?.StudentId, attendanceToBeUpdated?.TeacherId, userId);
+            AttendanceDto updatedAttendance = await _attendanceService.UpdateAttendanceAsync(id, attendanceToBeUpdated, userId);
             
             return Ok(updatedAttendance);
         }
