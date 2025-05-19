@@ -27,9 +27,9 @@ namespace SchoolManagement.API.Controllers
 
         // GET api/<AttendanceController>/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Attendance>> GetAttendance(int id, int userId)
+        public async Task<ActionResult<AttendanceResponseDto>> GetAttendance(int id, int userId)
         {
-            Attendance attendance = await _attendanceService.GetAttendanceByIdAsync(id, userId);
+            AttendanceResponseDto attendance = await _attendanceService.GetAttendanceByIdAsync(id, userId);
 
             return Ok(attendance);
         }
