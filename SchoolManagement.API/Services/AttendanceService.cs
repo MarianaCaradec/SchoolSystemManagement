@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration.UserSecrets;
 using SchoolManagement.API.Data.Context;
+using SchoolManagement.API.DTOs;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
 using static SchoolManagement.API.Models.User;
@@ -12,7 +13,7 @@ namespace SchoolManagement.API.Services
         private readonly SchoolSysDBContext _context = context;
         private readonly IUserService _userService = userService;
 
-        public async Task<IEnumerable<Attendance>> GetAttendancesAsync(int userId)
+        public async Task<IEnumerable<AttendanceDto>> GetAttendancesAsync(int userId)
         {
             UserRole userRole = await _userService.GetUserRole(userId);
 
@@ -24,13 +25,13 @@ namespace SchoolManagement.API.Services
 
             }
 
-            return await query.Select(a => new Attendance
+            return await query.Select(a => new AttendanceDto
             {
                  Id = a.Id,
                  Date = a.Date,
                  Present = a.Present,
-                 Student = a.Student,
-                 Teacher = userRole != UserRole.Student ? a.Teacher : null,
+                 StudentId = a.StudentId,
+                 TeacherId = userRole != UserRole.Student ? a.TeacherId : null,
             }).ToListAsync();
         }
 
