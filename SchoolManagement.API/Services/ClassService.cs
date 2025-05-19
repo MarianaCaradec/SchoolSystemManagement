@@ -107,8 +107,13 @@ namespace SchoolManagement.API.Services
                 Course = classToBeCreated.Course,
                 Divition = classToBeCreated.Divition,
                 Capacity = classToBeCreated.Capacity,
-                Teachers = classToBeCreated.TeacherId != 0 ? new List<Teacher> { new Teacher { Id = classToBeCreated.TeacherId } } : null,
-                Students = classToBeCreated.StudentId != 0 ? new List<Student> { new Student { Id = classToBeCreated.StudentId } } : null
+                Teachers = classToBeCreated.TeacherId != 0
+                ? new List<Teacher> { await _context.Teachers.FindAsync(classToBeCreated.TeacherId) }
+                : null,
+                Students = classToBeCreated.StudentId != 0
+                ? new List<Student> { await _context.Students.FindAsync(classToBeCreated.StudentId) }
+                : null
+
             };
 
             _context.Classes.Add(createdClass);
@@ -125,7 +130,7 @@ namespace SchoolManagement.API.Services
             };
         }
 
-        public async Task<Class> UpdateClassAsync(int id, Class classToBeUpdated, int userId)
+        public async Task<ClassInputDto> UpdateClassAsync(int id, ClassInputDto classToBeUpdated, int userId)
         {
             UserRole userRole = await _userService.GetUserRole(userId);
 
@@ -144,13 +149,26 @@ namespace SchoolManagement.API.Services
             classById.Course = classToBeUpdated.Course;
             classById.Divition = classToBeUpdated.Divition;
             classById.Capacity = classToBeUpdated.Capacity;
-            classById.Teachers = classToBeUpdated.Teachers;
-            classById.Students = classToBeUpdated.Students;
+            classById.Teachers = classToBeUpdated.TeacherId != 0
+            ? new List<Teacher> { await _context.Teachers.FindAsync(classToBeUpdated.TeacherId) }
+            : null;
+            classById.Students = classToBeUpdated.StudentId != 0
+            ? new List<Student> { await _context.Students.FindAsync(classToBeUpdated.StudentId) }
+            : null;
+
 
             _context.Classes.Update(classById);
             await _context.SaveChangesAsync();
 
-            return classById;
+            return new ClassInputDto
+            {
+                Id = classById.Id,
+                Course = classById.Course,
+                Divition = classById.Divition,
+                Capacity = classById.Capacity,
+                TeacherId = classToBeUpdated.TeacherId,
+                StudentId = classToBeUpdated.StudentId
+            };
         }
 
         public async Task<bool> DeleteClassAsync(int id, int userId)
