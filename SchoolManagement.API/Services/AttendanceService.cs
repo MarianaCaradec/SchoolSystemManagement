@@ -85,7 +85,7 @@ namespace SchoolManagement.API.Services
             };
         }
 
-        public async Task<Attendance> CreateAttendanceAsync(Attendance attendanceToBeCreated, int? studentId, int? teacherId, int userId)
+        public async Task<AttendanceDto> CreateAttendanceAsync(AttendanceDto attendanceToBeCreated, int userId)
         {
             UserRole userRole = await _userService.GetUserRole(userId);
 
@@ -94,18 +94,70 @@ namespace SchoolManagement.API.Services
                 throw new UnauthorizedAccessException("You are not authorized to do this action.");
             }
 
-            Attendance createdAttendance = new Attendance
+            bool hasStudent = attendanceToBeCreated.StudentId.HasValue && attendanceToBeCreated.StudentId != 0;
+            bool hasTeacher = attendanceToBeCreated.TeacherId.HasValue && attendanceToBeCreated.TeacherId != 0;
+
+            if (!hasStudent && !hasTeacher)
+            {
+                throw new ArgumentException("Either StudentId or TeacherId must be provided.");
+            }
+
+            if (hasStudent && hasTeacher)
+            {
+                throw new ArgumentException("Only one of StudentId or TeacherId must be provided.");
+            }
+
+            if (hasStudent)
+            {
+                Student studentWithClassAndTeachers = await _context.Students
+                    .Include(s => s.Class.Teachers)
+                    .FirstOrDefaultAsync(s => s.Id == attendanceToBeCreated.StudentId);
+
+                if (studentWithClassAndTeachers == null)
+                {
+                    throw new ArgumentException("Invalid student or class information.");
+                }
+
+                if (userRole == UserRole.Teacher &&
+                !studentWithClassAndTeachers.Class.Teachers.Any(t => t.UserId == userId))
+                {
+                    throw new UnauthorizedAccessException("You are not authorized to do this action.");
+                }
+            }
+
+            if (hasTeacher)
+            {
+                if (userRole == UserRole.Teacher)
+                {
+                    throw new UnauthorizedAccessException("Teachers cannot create attendance records for other teachers.");
+                }
+
+                if (userRole == UserRole.Teacher && attendanceToBeCreated.TeacherId == userId)
+                {
+                    throw new UnauthorizedAccessException("Teachers cannot create attendance records for themselves.");
+                }
+            }
+
+
+            Attendance createdAttendanceToBeSaved = new Attendance
             {
                 Date = attendanceToBeCreated.Date,
                 Present = attendanceToBeCreated.Present,
-                StudentId = studentId,
-                TeacherId = teacherId
+                StudentId = hasStudent ? attendanceToBeCreated.StudentId : null,
+                TeacherId = hasTeacher ? attendanceToBeCreated.TeacherId : null
             };
 
-            _context.Attendances.Add(createdAttendance);
+            _context.Attendances.Add(createdAttendanceToBeSaved);
             await _context.SaveChangesAsync();
 
-            return createdAttendance;
+            return new AttendanceDto
+            {
+                Id = createdAttendanceToBeSaved.Id,
+                Date = createdAttendanceToBeSaved.Date,
+                Present = createdAttendanceToBeSaved.Present,
+                StudentId = createdAttendanceToBeSaved.StudentId,
+                TeacherId = createdAttendanceToBeSaved.TeacherId
+            };
         }
 
         public async Task<Attendance> UpdateAttendanceAsync(int id, Attendance attendanceToBeUpdated, int? studentId, int? teacherId, int userId)
