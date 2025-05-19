@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using SchoolManagement.API.DTOs;
 using SchoolManagement.API.Interfaces;
 using SchoolManagement.API.Models;
 
@@ -15,9 +16,9 @@ namespace SchoolManagement.API.Controllers
 
         // GET: api/<AttendanceController>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Attendance>>> GetAllAttendances(int userId)
+        public async Task<ActionResult<IEnumerable<AttendanceDto>>> GetAllAttendances(int userId)
         {
-            IEnumerable<Attendance> attendances = await _attendanceService.GetAttendancesAsync(userId);
+            IEnumerable<AttendanceDto> attendances = await _attendanceService.GetAttendancesAsync(userId);
 
             if (attendances == null || !attendances.Any()) return NoContent();
 
