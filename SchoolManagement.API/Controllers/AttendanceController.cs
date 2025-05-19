@@ -36,9 +36,9 @@ namespace SchoolManagement.API.Controllers
 
         // POST api/<AttendanceController>
         [HttpPost]
-        public async Task<ActionResult<Attendance>> PostAttendance(Attendance attendanceToBeCreated, int userId)
+        public async Task<ActionResult<AttendanceDto>> PostAttendance(AttendanceDto attendanceToBeCreated, int userId)
         {
-            Attendance createdAttendance = await _attendanceService.CreateAttendanceAsync(attendanceToBeCreated, attendanceToBeCreated?.StudentId, attendanceToBeCreated?.TeacherId, userId);
+            AttendanceDto createdAttendance = await _attendanceService.CreateAttendanceAsync(attendanceToBeCreated, userId);
             
             return CreatedAtAction("GetAttendance", new { id = createdAttendance.Id }, createdAttendance);
         }
